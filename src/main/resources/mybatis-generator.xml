@@ -1,0 +1,22 @@
+<!DOCTYPE generatorConfiguration PUBLIC
+        "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+    <context id="simple" targetRuntime="MyBatis3Simple">
+        <!--数据库连接地址账号密码-->
+        <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+                        connectionURL="jdbc:mysql://127.0.0.1:3306/seckill"
+                        userId="root"
+                        password="admin123"
+        />
+        <!--DTO类存放位置-->
+        <javaModelGenerator targetPackage="com.hackhu.seckill.dto" targetProject="src/main/java"/>
+        <!--映射文件存放位置-->
+        <sqlMapGenerator targetPackage="mapping" targetProject="src/main/resources"/>
+        <!--Dao类存放位置-->
+        <javaClientGenerator type="XMLMAPPER" targetPackage="com.hackhu.seckill.dao" targetProject="src/main/java"/>
+
+        <table tableName="user_info" domainObjectName="UserDTO" />
+        <table tableName="user_password" domainObjectName="UserPasswordDTO" />
+    </context>
+</generatorConfiguration>
