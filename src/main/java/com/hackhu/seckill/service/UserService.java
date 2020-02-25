@@ -1,6 +1,7 @@
 package com.hackhu.seckill.service;
 
 import com.hackhu.seckill.dto.UserDTO;
+import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.service.model.UserModel;
 
 /**
@@ -9,4 +10,6 @@ import com.hackhu.seckill.service.model.UserModel;
  */
 public interface UserService {
     UserModel getUserById(Integer id);
+
+    boolean register(UserModel userModel) throws BusinessException;
 }
