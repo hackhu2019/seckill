@@ -78,6 +78,21 @@ public class UserController extends BaseController{
     }
 
     /**
+     * 用户登录接口
+     */
+    @RequestMapping("/login")
+    public CommonReturnType login(@RequestParam(name = "telephone") String telephone,
+                                      @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        // 对用户密码加密存储
+        UserModel result = userService.login(telephone, password);
+        // 登录成功将凭证加入session
+        if (result!=null) {
+            this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+        }
+        return CommonReturnType.create(result);
+    }
+
+    /**
      * 用户密码加密算法
      */
     private String encodeByMD5(String password) throws NoSuchAlgorithmException, UnsupportedEncodingException {

@@ -12,4 +12,6 @@ public interface UserService {
     UserModel getUserById(Integer id);
 
     boolean register(UserModel userModel) throws BusinessException;
+
+    UserModel login(String telephone, String password) throws BusinessException;
 }

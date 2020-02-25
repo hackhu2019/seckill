@@ -11,6 +11,7 @@ import com.hackhu.seckill.service.model.UserModel;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -48,13 +49,29 @@ public class UserServiceImpl implements UserService {
         }
         // 数据库中添加数据
         UserDTO userDTO = convertUserDTOFromUserModel(userModel);
-        int result = userDTOMapper.insertSelective(userDTO);
+
+        int result = 0;
+        try {
+            result = userDTOMapper.insertSelective(userDTO);
+        } catch (DuplicateKeyException e) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "手机号不能重复");
+        }
         if (result < 1) {
             return false;
         }
         UserPasswordDTO userPasswordDTO = convertUserPasswordDTOFromUserModel(userModel);
         result = userPasswordDTOMapper.insert(userPasswordDTO);
         return result>0;
+    }
+
+    @Override
+    public UserModel login(String telephone, String password) throws BusinessException {
+        UserDTO userDTO = userDTOMapper.selectByTelephone(telephone);
+        if (userDTO == null) {
+            return null;
+        }
+        UserPasswordDTO userPasswordDTO = userPasswordDTOMapper.selectByUserId(userDTO.getId());
+        return userPasswordDTO != null && password.equals(userPasswordDTO.getEncrptPassword())?convertFromUserModel(userDTO,userPasswordDTO):null;
     }
 
     /**
