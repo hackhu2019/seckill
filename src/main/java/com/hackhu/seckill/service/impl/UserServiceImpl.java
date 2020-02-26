@@ -6,15 +6,20 @@ import com.hackhu.seckill.dto.UserDTO;
 import com.hackhu.seckill.dto.UserPasswordDTO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
+import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.UserService;
 import com.hackhu.seckill.service.model.UserModel;
+import com.hackhu.seckill.validator.ValidatorImpl;
+import com.hackhu.seckill.validator.ValidatorResult;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import javax.annotation.Resource;
+import javax.validation.Validator;
 
 /**
  * @author hackhu
@@ -26,6 +31,8 @@ public class UserServiceImpl implements UserService {
     private UserDTOMapper userDTOMapper;
     @Resource
     private UserPasswordDTOMapper userPasswordDTOMapper;
+    @Resource
+    private ValidatorImpl validator;
     @Override
     public UserModel getUserById(Integer id) {
         UserDTO userDTO = userDTOMapper.selectByPrimaryKey(id);
@@ -37,15 +44,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public boolean register(UserModel userModel) throws BusinessException {
         // 校验数据有效性
-        if (userModel == null ||
-                StringUtils.isEmpty(userModel.getName())||
-                userModel.getGender()==null||
-                userModel.getAge()==null||
-                StringUtils.isEmpty(userModel.getTelephone())||
-                StringUtils.isEmpty(userModel.getPassword())) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR);
+        ValidatorResult validatorResult = validator.validate(userModel);
+        if (validatorResult.isHasErrors()) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,validatorResult.getErrorMsg());
         }
         // 数据库中添加数据
         UserDTO userDTO = convertUserDTOFromUserModel(userModel);
