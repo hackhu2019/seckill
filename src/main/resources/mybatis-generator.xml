@@ -19,7 +19,7 @@
 
         <table tableName="user_info" domainObjectName="UserDTO" />
         <table tableName="user_password" domainObjectName="UserPasswordDTO" />
-        <table tableName="item" domainObjectName="Item" />
-        <table tableName="item_stock" domainObjectName="ItemStock" />
+        <table tableName="item" domainObjectName="ItemDTO" />
+        <table tableName="item_stock" domainObjectName="ItemStockDTO" />
     </context>
 </generatorConfiguration>
