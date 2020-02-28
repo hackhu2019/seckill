@@ -4,6 +4,7 @@ import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.model.ItemModel;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -15,6 +16,7 @@ import javax.annotation.Resource;
  */
 @RestController
 @RequestMapping("/item")
+@CrossOrigin(allowCredentials = "true",allowedHeaders = "*")
 public class ItemController {
     @Resource
     private ItemService itemService;

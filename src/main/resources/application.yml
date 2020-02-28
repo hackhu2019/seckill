@@ -1,0 +1,10 @@
+# \u914D\u7F6E\u6570\u636E\u5E93\u8FDE\u63A5
+spring:
+  datasource:
+    url:  mysql://localhost:3306/seckill?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    username: root
+    password: admin123
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    name: seckill
+    type: com.alibaba.druid.pool.DruidDataSource
+
