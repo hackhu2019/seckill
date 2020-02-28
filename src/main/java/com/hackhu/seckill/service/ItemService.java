@@ -23,5 +23,5 @@ public interface ItemService {
     /**
      * 商品详情展示
      */
-    ItemModel getItemDetailById(Integer itemId);
+    ItemModel getItemDetailById(Integer itemId) throws BusinessException;
 }

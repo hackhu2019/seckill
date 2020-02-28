@@ -1,7 +1,7 @@
 package com.hackhu.seckill.service.impl;
 
-import com.hackhu.seckill.dao.ItemMapper;
-import com.hackhu.seckill.dao.ItemStockMapper;
+import com.hackhu.seckill.dao.ItemDTOMapper;
+import com.hackhu.seckill.dao.ItemStockDTOMapper;
 import com.hackhu.seckill.dto.ItemDTO;
 import com.hackhu.seckill.dto.ItemStockDTO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -25,9 +26,9 @@ import java.util.List;
 @Transactional
 public class ItemServiceImpl implements ItemService {
     @Resource
-    private ItemMapper itemMapper;
+    private ItemDTOMapper itemDTOMapper;
     @Resource
-    private ItemStockMapper itemStockMapper;
+    private ItemStockDTOMapper itemStockDTOMapper;
     @Resource
     private ValidatorImpl validator;
     @Override
@@ -39,12 +40,12 @@ public class ItemServiceImpl implements ItemService {
         }
         // 写入数据库
         ItemDTO itemDTO = convertItemDTOFromItemModel(itemModel);
-        int result = itemMapper.insert(itemDTO);
+        int result = itemDTOMapper.insertSelective(itemDTO);
         if (result < 1) {
             return false;
         }
         ItemStockDTO itemStockDTO = convertItemStockDTOFromItemModel(itemModel);
-        result = itemStockMapper.insert(itemStockDTO);
+        result = itemStockDTOMapper.insertSelective(itemStockDTO);
         return result > 0;
     }
 
@@ -54,9 +55,6 @@ public class ItemServiceImpl implements ItemService {
     private ItemDTO convertItemDTOFromItemModel(ItemModel itemModel) {
         ItemDTO itemDTO = new ItemDTO();
         BeanUtils.copyProperties(itemModel, itemDTO);
-        // 处理浮点型数据精度丢失问题
-        itemDTO.setPrice(itemModel.getPrice().doubleValue());
-        
         return itemDTO;
     }
     /**
@@ -70,11 +68,44 @@ public class ItemServiceImpl implements ItemService {
     }
     @Override
     public List<ItemModel> getItemList() {
-        return null;
+        List<ItemDTO> itemDTOS = itemDTOMapper.selectAll();
+        List<ItemStockDTO> itemStockDTOS = itemStockDTOMapper.selectAll();
+        return convertItemModelListFromItemDTOListAndItemStockDTOList(itemDTOS, itemStockDTOS);
     }
 
     @Override
-    public ItemModel getItemDetailById(Integer itemId) {
-        return null;
+    public ItemModel getItemDetailById(Integer itemId) throws BusinessException {
+        ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
+        if (itemDTO == null) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品id错误");
+        }
+        ItemStockDTO itemStockDTO = itemStockDTOMapper.selectByItemId(itemId);
+        ItemModel itemModel = convertItemModelFromItemDTOAndItemStockDTO(itemDTO, itemStockDTO);
+        return itemModel;
+    }
+
+    /**
+     * 将 itemDTOList、itemStockDTOList 转换为 itemModelList
+     */
+    private List<ItemModel> convertItemModelListFromItemDTOListAndItemStockDTOList(List<ItemDTO> itemDTOList, List<ItemStockDTO> itemStockDTOList) {
+        List<ItemModel> itemModels = new ArrayList<>();
+        if (itemDTOList != null ||
+                itemStockDTOList != null ||
+                itemDTOList.size() > 0 ||
+                itemStockDTOList.size() > 0) {
+            for (int i = 0; i < itemDTOList.size(); i++) {
+                itemModels.add(convertItemModelFromItemDTOAndItemStockDTO(itemDTOList.get(i), itemStockDTOList.get(i)));
+            }
+        }
+        return itemModels;
+    }
+        /**
+         * 将 itemDTO、itemStockDTO 转换为 itemModel
+         */
+    private ItemModel convertItemModelFromItemDTOAndItemStockDTO(ItemDTO itemDTO, ItemStockDTO itemStockDTO) {
+        ItemModel itemModel = new ItemModel();
+        BeanUtils.copyProperties(itemDTO, itemModel);
+        itemModel.setStock(itemStockDTO.getStock());
+        return itemModel;
     }
 }

@@ -32,6 +32,4 @@ public class ItemModel {
     // 商品图片地址
     @NotNull(message = "商品图片地址不能为空")
     private String imgUrl;
-    
-    
 }
