@@ -24,4 +24,9 @@ public interface ItemService {
      * 商品详情展示
      */
     ItemModel getItemDetailById(Integer itemId) throws BusinessException;
+
+    /**
+     * 减少商品库存
+     */
+    boolean decreaseStock(Integer itemId,Integer amount) throws BusinessException;
 }

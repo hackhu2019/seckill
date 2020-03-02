@@ -1,6 +1,7 @@
 package com.hackhu.seckill.dao;
 
 import com.hackhu.seckill.dto.ItemStockDTO;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -56,4 +57,6 @@ public interface ItemStockDTOMapper {
      * @mbggenerated Fri Feb 28 16:58:42 CST 2020
      */
     int updateByPrimaryKey(ItemStockDTO record);
+
+    int decreaseStock(@Param("itemId") Integer itemId, @Param("amount") Integer amount);
 }
