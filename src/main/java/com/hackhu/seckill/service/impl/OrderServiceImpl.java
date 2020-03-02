@@ -5,6 +5,7 @@ import com.hackhu.seckill.dao.*;
 import com.hackhu.seckill.dto.*;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
+import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.OrderService;
 import com.hackhu.seckill.service.model.OrderModel;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +34,8 @@ public class OrderServiceImpl implements OrderService {
     private ItemStockDTOMapper itemStockDTOMapper;
     @Resource
     private SequenceInfoDTOMapper sequenceInfoDTOMapper;
+    @Resource
+    private ItemService itemService;
     @Override
     @Transactional
     public OrderModel createOrder(Integer userId, Integer itemId, Integer amount) throws BusinessException {
@@ -50,8 +53,8 @@ public class OrderServiceImpl implements OrderService {
             throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"商品库存不足");
         }
         // 校验通过，落单减库存
-        int result = itemStockDTOMapper.decreaseStock(itemId, amount);
-        if (result<1){
+        boolean result = itemService.decreaseStock(itemId, amount);
+        if (!result){
             throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "库存减少失败");
         }
         // 订单入库
@@ -60,7 +63,10 @@ public class OrderServiceImpl implements OrderService {
         orderInfoDTO.setItemPrice(itemDTO.getPrice().doubleValue());
         orderInfoDTO.setOrderPrice(itemDTO.getPrice().multiply(new BigDecimal(amount)).doubleValue());
         // 创建订单流水号
-        
+        orderInfoDTO.setId(generateOrderNO());
+        orderInfoDTOMapper.insertSelective(orderInfoDTO);
+        // 更新商品销量
+        itemService.increaseSale(itemId, amount);
         return convertOrderModerFromOrderInfo(orderInfoDTO);
     }
 

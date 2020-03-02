@@ -56,4 +56,6 @@ public interface ItemDTOMapper {
      * @mbggenerated Fri Feb 28 16:58:42 CST 2020
      */
     int updateByPrimaryKey(ItemDTO record);
+
+    boolean increaseSales(Integer itemId, Integer amount);
 }

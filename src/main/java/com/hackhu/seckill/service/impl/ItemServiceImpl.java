@@ -97,6 +97,12 @@ public class ItemServiceImpl implements ItemService {
         }
     }
 
+    @Override
+    public boolean increaseSale(Integer itemId, Integer amount) throws BusinessException {
+        boolean result = itemDTOMapper.increaseSales(itemId, amount);
+        return result;
+    }
+
     /**
      * 将 itemDTOList、itemStockDTOList 转换为 itemModelList
      */

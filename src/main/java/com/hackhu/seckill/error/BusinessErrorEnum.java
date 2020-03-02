@@ -9,7 +9,8 @@ public enum BusinessErrorEnum implements CommonError {
     PARAMETER_VALIDATION_ERROR(00001,"参数不合法"),
     UNKNOW_ERROR(00002,"未知错误"),
     // 1000 开头为用户信息相关错误码
-    USER_NOT_EXIST(10001, "用户不存在"),;
+    USER_NOT_EXIST(10001, "用户不存在"),
+    USER_NOT_LOGIN(10002, "用户未登录");
 
     private int errorCode;
     private String errorMsg;
