@@ -7,4 +7,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
     name: seckill
     type: com.alibaba.druid.pool.DruidDataSource
-
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
