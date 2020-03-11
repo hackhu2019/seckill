@@ -7,6 +7,7 @@ import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.OrderService;
+import com.hackhu.seckill.service.model.ItemModel;
 import com.hackhu.seckill.service.model.OrderModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -36,43 +37,67 @@ public class OrderServiceImpl implements OrderService {
     private SequenceInfoDTOMapper sequenceInfoDTOMapper;
     @Resource
     private ItemService itemService;
+
     @Override
     @Transactional
-    public OrderModel createOrder(Integer userId, Integer itemId, Integer amount) throws BusinessException {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BusinessException {
         // 校验订单合法性，商品是否存在，用户是否合法、购买数量是否超出库存
-        UserDTO userDTO= userDTOMapper.selectByPrimaryKey(userId) ;
-        if (userDTO==null) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"用户不存在");
+        UserDTO userDTO = userDTOMapper.selectByPrimaryKey(userId);
+        if (userDTO == null) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "用户不存在");
         }
-        ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
-        if (itemDTO == null) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"商品不存在");
+        ItemModel itemModel = itemService.getItemDetailById(itemId);
+        if (itemModel == null) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品不存在");
         }
         ItemStockDTO itemStockDTO = itemStockDTOMapper.selectByItemId(itemId);
-        if (itemStockDTO.getStock()<amount){
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"商品库存不足");
+        if (itemStockDTO.getStock() < amount) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品库存不足");
+        }
+        // 校验秒杀活动信息
+        if (promoId == null || !promoId.equals(itemModel.getPromoModel().getId())) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"活动信息不正确");
+        }
+        if (itemModel.getPromoModel().getStatus().intValue() != 2) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"活动信息还未开始");
         }
         // 校验通过，落单减库存
         boolean result = itemService.decreaseStock(itemId, amount);
-        if (!result){
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "库存减少失败");
+        if (!result) {
+            throw new BusinessException(BusinessErrorEnum.STOCK_NOT_ENOUGH);
         }
         // 订单入库
-        OrderInfoDTO orderInfoDTO = new OrderInfoDTO();
-        orderInfoDTO.setItemId(itemId);
-        orderInfoDTO.setItemPrice(itemDTO.getPrice().doubleValue());
-        orderInfoDTO.setOrderPrice(itemDTO.getPrice().multiply(new BigDecimal(amount)).doubleValue());
+        OrderModel orderModel = new OrderModel();
+        orderModel.setItemId(itemId);
+        if(promoId != null){
+            orderModel.setItemPrice(itemModel.getPromoModel().getPromoItemPrice());
+        }else{
+            orderModel.setItemPrice(itemModel.getPrice());
+        }
+        orderModel.setPromoId(promoId);
+        orderModel.setOrderPrice(itemModel.getPrice().multiply(new BigDecimal(amount)));
         // 创建订单流水号
-        orderInfoDTO.setId(generateOrderNO());
+        orderModel.setId(generateOrderNO());
+        OrderInfoDTO orderInfoDTO = convertFromOrderModel(orderModel);
         orderInfoDTOMapper.insertSelective(orderInfoDTO);
         // 更新商品销量
         itemService.increaseSale(itemId, amount);
         return convertOrderModerFromOrderInfo(orderInfoDTO);
     }
 
-    /**
-     * 将 orderInfo 转换为 orderModel
-     */
+    private OrderInfoDTO convertFromOrderModel(OrderModel orderModel) {
+        if (orderModel == null) {
+            return null;
+        }
+        OrderInfoDTO orderInfoDTO = new OrderInfoDTO();
+        BeanUtils.copyProperties(orderModel, orderInfoDTO);
+        orderInfoDTO.setItemPrice(orderModel.getItemPrice().doubleValue());
+        orderInfoDTO.setOrderPrice(orderModel.getOrderPrice().doubleValue());
+        return orderInfoDTO;
+    }
+        /**
+         * 将 orderInfo 转换为 orderModel
+         */
     private OrderModel convertOrderModerFromOrderInfo(OrderInfoDTO orderInfoDTO) {
         OrderModel orderModel = new OrderModel();
         BeanUtils.copyProperties(orderInfoDTO, orderModel);

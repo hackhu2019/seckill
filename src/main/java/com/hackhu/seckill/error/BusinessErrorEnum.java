@@ -10,8 +10,9 @@ public enum BusinessErrorEnum implements CommonError {
     UNKNOW_ERROR(00002,"未知错误"),
     // 1000 开头为用户信息相关错误码
     USER_NOT_EXIST(10001, "用户不存在"),
-    USER_NOT_LOGIN(10002, "用户未登录");
-
+    USER_NOT_LOGIN(10002, "用户未登录"),
+    // 3000 开头为交易信息相关错误码
+    STOCK_NOT_ENOUGH(30001, "商品库存不足"),;
     private int errorCode;
     private String errorMsg;
 
