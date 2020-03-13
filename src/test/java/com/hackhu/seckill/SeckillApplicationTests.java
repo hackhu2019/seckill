@@ -5,7 +5,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
 class SeckillApplicationTests {
-
     @Test
     void contextLoads() {
         Integer no = 12;

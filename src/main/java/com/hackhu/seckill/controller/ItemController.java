@@ -6,10 +6,7 @@ import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -27,7 +24,7 @@ public class ItemController extends BaseController{
     @Resource
     private ItemService itemService;
 
-    @RequestMapping("/create")
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
     public CommonReturnType create(ItemModel itemModel) throws BusinessException {
         boolean result = itemService.createItem(itemModel);
         return CommonReturnType.create(result);

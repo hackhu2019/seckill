@@ -28,7 +28,7 @@ public class GlobalExceptionHandler {
         if( ex instanceof BusinessException){
             BusinessException businessException = (BusinessException)ex;
             responseData.put("errCode",businessException.getErrorCode());
-            responseData.put("errMsg",businessException.getErrorCode());
+            responseData.put("errMsg",businessException.getErrorMsg());
         }else if(ex instanceof ServletRequestBindingException){
             responseData.put("errCode", BusinessErrorEnum.UNKNOWN_ERROR.getErrorCode());
             responseData.put("errMsg","url绑定路由问题");
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
             responseData.put("errMsg","没有找到对应的访问路径");
         }else{
             responseData.put("errCode", BusinessErrorEnum.UNKNOWN_ERROR.getErrorCode());
-            responseData.put("errMsg",BusinessErrorEnum.UNKNOWN_ERROR.getErrorCode());
+            responseData.put("errMsg",BusinessErrorEnum.UNKNOWN_ERROR.getErrorMsg());
         }
         return CommonReturnType.create(responseData,"fail");
     }
