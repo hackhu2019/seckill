@@ -18,7 +18,7 @@ public class UserModel {
     @NotBlank(message = "用户名不能为空")
     private String name;
     @NotNull(message = "性别为必填项")
-    private Byte gender;
+    private Integer gender;
     @NotNull(message = "年龄为必填项")
     @Max(value = 150,message = "请输入有效年龄")
     @Min(value = 0,message = "请输入有效年龄")

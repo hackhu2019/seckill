@@ -56,21 +56,19 @@ public class UserController extends BaseController{
     public CommonReturnType regiseter(@RequestParam(name = "telephone") String telephone,
                                       @RequestParam(name = "otpCode") String otpCode,
                                       @RequestParam(name = "name") String name,
-                                      @RequestParam(name = "gender") Byte gender,
+                                      @RequestParam(name = "gender") Integer gender,
                                       @RequestParam(name = "age") Integer age,
-                                      @RequestParam(name = "thirdPartyId") String thirdPartyId,
                                       @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // 验证短信验证码是否正确
         String sessionOTPCode = (String) httpServletRequest.getSession().getAttribute(telephone);
         if (!StringUtils.equals(otpCode,sessionOTPCode)){
-            return CommonReturnType.create(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"短信验证码不一致");
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "短信验证码不一致");
         }
         // 注册用户
         UserModel userModel = new UserModel();
         userModel.setName(name);
         userModel.setTelephone(telephone);
         userModel.setAge(age);
-        userModel.setThirdPartyId(thirdPartyId);
         userModel.setGender(gender);
         // 对用户密码加密存储
         userModel.setPassword(encodeByMD5(password));
@@ -104,7 +102,7 @@ public class UserController extends BaseController{
     /**
      * 用户获取otp短信接口
      */
-    @RequestMapping(value = "getotp",method = RequestMethod.POST,consumes = CONTENT_TYPE_FORMED)
+    @RequestMapping(value = "/getotp",method = RequestMethod.POST,consumes = CONTENT_TYPE_FORMED)
     public CommonReturnType getOTP(@RequestParam(name = "telephone")String telephone) {
          // 按照规则生成OTP验证码
         Random rd = new Random();

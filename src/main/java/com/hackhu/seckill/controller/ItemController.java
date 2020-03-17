@@ -24,19 +24,19 @@ public class ItemController extends BaseController{
     @Resource
     private ItemService itemService;
 
-    @RequestMapping(value = "/create", method = RequestMethod.POST)
+    @RequestMapping(value = "/create",method = {RequestMethod.POST},consumes={CONTENT_TYPE_FORMED})
     public CommonReturnType create(ItemModel itemModel) throws BusinessException {
         boolean result = itemService.createItem(itemModel);
         return CommonReturnType.create(result);
     }
 
-    @RequestMapping("/detail")
+    @RequestMapping(value = "/get",method = {RequestMethod.GET})
     public CommonReturnType detail(@RequestParam(name = "id") Integer itemId) throws BusinessException {
         ItemModel result = itemService.getItemDetailById(itemId);
         return CommonReturnType.create(result);
     }
 
-    @RequestMapping("/getAll")
+    @RequestMapping(value = "/list",method = {RequestMethod.GET})
     public CommonReturnType detail() throws BusinessException {
         List<ItemModel> itemList = itemService.getItemList();
         List<ItemVO> itemVOS = itemList.stream().map(itemModel ->{

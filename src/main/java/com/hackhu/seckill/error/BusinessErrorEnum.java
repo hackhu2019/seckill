@@ -16,7 +16,7 @@ public enum BusinessErrorEnum implements CommonError {
     private int errorCode;
     private String errorMsg;
 
-    private BusinessErrorEnum(int errorCode, String errorMsg) {
+    BusinessErrorEnum(int errorCode, String errorMsg) {
         this.errorCode = errorCode;
         this.errorMsg = errorMsg; 
     }
@@ -31,6 +31,9 @@ public enum BusinessErrorEnum implements CommonError {
         return this.errorMsg;
     }
 
+    public void setErrorCode(int errorCode) {
+        this.errorCode = errorCode;
+    }
     @Override
     public CommonError setErrorMsg(String errorMsg) {
         this.errorMsg = errorMsg;
