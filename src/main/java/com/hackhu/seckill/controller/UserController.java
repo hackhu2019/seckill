@@ -4,11 +4,13 @@ import com.alibaba.druid.util.StringUtils;
 import com.hackhu.seckill.controller.viewobject.UserVO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
+import com.hackhu.seckill.error.CommonError;
 import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.UserService;
 import com.hackhu.seckill.service.model.UserModel;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +21,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hackhu
@@ -37,6 +37,8 @@ public class UserController extends BaseController{
     private UserService userService;
     @Resource
     private HttpServletRequest httpServletRequest;
+    @Resource
+    private RedisTemplate redisTemplate;
     private String salt = "hack-hu";
 
     @RequestMapping(value = "/get", method = RequestMethod.GET)
@@ -82,11 +84,21 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public CommonReturnType login(@RequestParam(name = "telephone") String telephone,
                                   @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        if (StringUtils.isEmpty(telephone)||StringUtils.isEmpty(password)) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR);
+        }
         // 对用户密码加密存储
         UserModel result = userService.login(telephone, password);
         // 登录成功将凭证加入session
         if (result != null) {
-            this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+            // 生成登录凭证 token、uuid
+            String uuidToken = UUID.randomUUID().toString();
+            uuidToken = uuidToken.replace("-", "");
+            // 将 uuid 存入 redis
+            redisTemplate.opsForValue().set(uuidToken, result);
+            redisTemplate.expire(uuidToken, 1, TimeUnit.HOURS);
+//            this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+            return CommonReturnType.create(uuidToken);
         }
         return CommonReturnType.create(result);
     }
