@@ -14,4 +14,9 @@ public interface UserService {
     boolean register(UserModel userModel) throws BusinessException;
 
     UserModel login(String telephone, String password) throws BusinessException;
+
+    /**
+     * 从缓存中获取用户对象
+     */
+    UserModel getUserByIdInCache(Integer userId);
 }

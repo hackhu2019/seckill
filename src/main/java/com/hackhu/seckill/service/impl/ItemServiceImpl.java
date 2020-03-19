@@ -11,12 +11,14 @@ import com.hackhu.seckill.service.model.ItemModel;
 import com.hackhu.seckill.validator.ValidatorImpl;
 import com.hackhu.seckill.validator.ValidatorResult;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hackhu
@@ -31,6 +33,9 @@ public class ItemServiceImpl implements ItemService {
     private ItemStockDTOMapper itemStockDTOMapper;
     @Resource
     private ValidatorImpl validator;
+    @Resource
+    private RedisTemplate redisTemplate;
+    private String cachePrefix = "item_validate_";
     @Override
     public boolean createItem(ItemModel itemModel) throws BusinessException {
         // 校验 itemModel 参数合法性
@@ -75,13 +80,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemModel getItemDetailById(Integer itemId) throws BusinessException {
-        ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
-        if (itemDTO == null) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品id错误");
-        }
-        ItemStockDTO itemStockDTO = itemStockDTOMapper.selectByItemId(itemId);
-        ItemModel itemModel = convertItemModelFromItemDTOAndItemStockDTO(itemDTO, itemStockDTO);
-        return itemModel;
+        return getItemByIdInCache(itemId);
     }
 
     @Override
@@ -101,6 +100,22 @@ public class ItemServiceImpl implements ItemService {
     public boolean increaseSale(Integer itemId, Integer amount) throws BusinessException {
         boolean result = itemDTOMapper.increaseSales(itemId, amount);
         return result;
+    }
+
+    @Override
+    public ItemModel getItemByIdInCache(Integer itemId) throws BusinessException {
+        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get(cachePrefix + itemId);
+        if (itemId == null) {
+            ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
+            if (itemDTO == null) {
+                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品id错误");
+            }
+            ItemStockDTO itemStockDTO = itemStockDTOMapper.selectByItemId(itemId);
+            itemModel = convertItemModelFromItemDTOAndItemStockDTO(itemDTO, itemStockDTO);
+            redisTemplate.opsForValue().set(cachePrefix, itemModel);
+            redisTemplate.expire(cachePrefix + itemId, 10, TimeUnit.MINUTES);
+        }
+        return itemModel;
     }
 
     /**

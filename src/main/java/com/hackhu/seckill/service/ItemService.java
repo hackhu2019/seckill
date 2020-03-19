@@ -30,5 +30,10 @@ public interface ItemService {
      */
     boolean decreaseStock(Integer itemId,Integer amount) throws BusinessException;
 
-    boolean increaseSale(Integer itemId,Integer amount) throws BusinessException;
+    boolean increaseSale(Integer itemId, Integer amount) throws BusinessException;
+
+    /**
+     * 从缓存中获取 itemModel
+     */
+    ItemModel getItemByIdInCache(Integer itemId) throws BusinessException;
 }
