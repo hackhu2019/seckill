@@ -5,6 +5,7 @@ import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.CacheService;
 import com.hackhu.seckill.service.ItemService;
+import com.hackhu.seckill.service.PromoService;
 import com.hackhu.seckill.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,6 +30,8 @@ public class ItemController extends BaseController{
     private RedisTemplate redisTemplate;
     @Resource
     private CacheService cacheService;
+    @Resource
+    private PromoService promoService;
 
     @RequestMapping(value = "/create",method = {RequestMethod.POST},consumes={CONTENT_TYPE_FORMED})
     public CommonReturnType create(ItemModel itemModel) throws BusinessException {
@@ -57,6 +60,12 @@ public class ItemController extends BaseController{
         return CommonReturnType.create(itemVO);
     }
 
+
+    @RequestMapping(value = "/publishpromo", method = {RequestMethod.GET})
+    public CommonReturnType publishPromo(@RequestParam(name = "id") Integer promoId) {
+        promoService.publicPromo(promoId);
+        return CommonReturnType.create(null);
+    }
     @RequestMapping(value = "/list",method = {RequestMethod.GET})
     public CommonReturnType detail() throws BusinessException {
         List<ItemModel> itemList = itemService.getItemList();
