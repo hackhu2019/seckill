@@ -27,3 +27,7 @@ server:
     max-threads: 800
     min-spare-threads: 100
   port: 8090
+mq:
+  nameserver:
+    addr: 121.42.141.30:9876
+    topicname: TopicTTest

@@ -6,6 +6,7 @@ import com.hackhu.seckill.dto.ItemDTO;
 import com.hackhu.seckill.dto.ItemStockDTO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
+import com.hackhu.seckill.mq.RocketMQProducer;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.model.ItemModel;
 import com.hackhu.seckill.validator.ValidatorImpl;
@@ -35,6 +36,8 @@ public class ItemServiceImpl implements ItemService {
     private ValidatorImpl validator;
     @Resource
     private RedisTemplate redisTemplate;
+    @Resource
+    private RocketMQProducer rocketMQProducer;
     private String cachePrefix = "item_validate_";
     @Override
     public boolean createItem(ItemModel itemModel) throws BusinessException {
@@ -89,9 +92,15 @@ public class ItemServiceImpl implements ItemService {
         int affectedRow =  itemStockDTOMapper.decreaseStock(itemId,amount);
         if(affectedRow > 0){
             //更新库存成功
+            boolean mqResult = rocketMQProducer.asyncReduceStock(itemId, amount);
+            if (!mqResult) {
+                redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount.intValue());
+                return false;
+            }
             return true;
         }else{
             //更新库存失败
+            redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount.intValue());
             return false;
         }
     }
