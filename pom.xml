@@ -117,24 +117,24 @@
                         <version>8.0.19</version>
                     </dependency>
                 </dependencies>
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <id>mybatis generator</id>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>generate</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--                <configuration>-->
-<!--                    &lt;!&ndash;允许移动生成的文件&ndash;&gt;-->
-<!--                    <verbose>true</verbose>-->
-<!--                    &lt;!&ndash;是否允许自动覆盖文件&ndash;&gt;-->
-<!--                    <overwrite>false</overwrite>-->
-<!--                    <configurationFile>-->
-<!--                         src/main/resources/mybatis-generator.xml-->
-<!--                    </configurationFile>-->
-<!--                </configuration>-->
+                <executions>
+                    <execution>
+                        <id>mybatis generator</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--允许移动生成的文件-->
+                    <verbose>true</verbose>
+                    <!--是否允许自动覆盖文件-->
+                    <overwrite>false</overwrite>
+                    <configurationFile>
+                         src/main/resources/mybatis-generator.xml
+                    </configurationFile>
+                </configuration>
             </plugin>
             <plugin>
                  <artifactId>maven-compiler-plugin</artifactId>
