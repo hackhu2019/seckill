@@ -37,6 +37,8 @@ public class OrderServiceImpl implements OrderService {
     private SequenceInfoDTOMapper sequenceInfoDTOMapper;
     @Resource
     private ItemService itemService;
+    @Resource
+    private StockLogDTOMapper stockLogDTOMapper;
 
     @Override
     @Transactional
@@ -82,6 +84,13 @@ public class OrderServiceImpl implements OrderService {
         orderInfoDTOMapper.insertSelective(orderInfoDTO);
         // 更新商品销量
         itemService.increaseSale(itemId, amount);
+        // 设置库存流水状态为成功
+        StockLogDTO stockLogDTO = stockLogDTOMapper.selectByPrimaryKey(stockLogId);
+        if (stockLogDTO == null) {
+            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
+        }
+        stockLogDTO.setStatus(2);
+        stockLogDTOMapper.updateByPrimaryKeySelective(stockLogDTO);
         return convertOrderModerFromOrderInfo(orderInfoDTO);
     }
 
