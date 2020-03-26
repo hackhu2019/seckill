@@ -14,4 +14,9 @@ public interface PromoService {
      * 活动发布
      */
     void publicPromo(Integer promoId) throws BusinessException;
+
+    /**
+     * 秒杀令牌生成
+     */
+    String generateSeckillToken(Integer promId, Integer itemId, Integer userId);
 }
