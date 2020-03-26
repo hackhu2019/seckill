@@ -65,6 +65,8 @@ public class PromoServiceImpl implements PromoService {
         ItemModel itemModel = itemService.getItemDetailById(promoDTO.getItemId());
         // 同步至缓存
         redisTemplate.opsForValue().set(cachePrefix + itemModel.getId(), itemModel.getStock());
+        // 限制秒杀令牌生成数
+        redisTemplate.opsForValue().set("promo_door_count" + promoId, itemModel.getStock() * 5);
     }
 
     @Override
@@ -97,6 +99,11 @@ public class PromoServiceImpl implements PromoService {
         // 判断用户信息是否存在
         UserModel userModel = userService.getUserById(userId);
         if (userModel == null) {
+            return null;
+        }
+        // 判断当前令牌数是否已全部消耗
+        Integer tokenCount = (Integer) redisTemplate.opsForValue().get("promo_door_count" + promId);
+        if (tokenCount < 1) {
             return null;
         }
         // 生成秒杀令牌

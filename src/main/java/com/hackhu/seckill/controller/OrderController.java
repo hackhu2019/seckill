@@ -13,8 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
+import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.concurrent.*;
 
 /**
  * @author hackhu
@@ -36,14 +38,18 @@ public class OrderController extends BaseController {
     private HttpServletRequest httpServletRequest;
     @Resource
     private PromoService promoService;
+    private ExecutorService executorService;
+
+    @PostConstruct
+    public void init() {
+        executorService = Executors.newFixedThreadPool(20);
+    }
     /**
      * 获取秒杀令牌
-     *
      * @return
      * @throws BusinessException
      */
     @RequestMapping(value = "getSeckillToken", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
-
     public CommonReturnType getSeckillToken(@RequestParam(name = "itemId") Integer itemId,
                                             @RequestParam(name = "promoId") Integer promoId) throws BusinessException {
         // 根据 token 获取用户信息
@@ -81,6 +87,7 @@ public class OrderController extends BaseController {
         if (userModel == null) {
             throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN);
         }
+        // 验证秒杀令牌合法性
         if (promoId != null) {
             String redisSeckillToken = (String) redisTemplate.opsForValue().get("promo_token_" + promoId + "_userid_" + userModel.getId() + "_itemid_" + itemId);
             if (redisSeckillToken == null) {
@@ -90,14 +97,28 @@ public class OrderController extends BaseController {
                 throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "令牌生成失败");
             }
         }
-        // 判断库存是否已售罄
-        if (redisTemplate.hasKey("promo_item_stock_invalid_" + itemId)) {
-            throw new BusinessException(BusinessErrorEnum.STOCK_NOT_ENOUGH);
-        }
-        // 库存流水初始化
-        String stockLogId = itemService.initStockLog(itemId, amount);
-        if (!rocketMQProducer.transactionAsyncReduceStock(userModel.getId(), itemId, promoId, amount, stockLogId)) {
-            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR, "下单失败");
+        // 队列泄洪
+        Future<Object> future=executorService.submit(new Callable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                // 判断库存是否已售罄
+                if (redisTemplate.hasKey("promo_item_stock_invalid_" + itemId)) {
+                    throw new BusinessException(BusinessErrorEnum.STOCK_NOT_ENOUGH);
+                }
+                // 库存流水初始化
+                String stockLogId = itemService.initStockLog(itemId, amount);
+                if (!rocketMQProducer.transactionAsyncReduceStock(userModel.getId(), itemId, promoId, amount, stockLogId)) {
+                    throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR, "下单失败");
+                }
+                return null;
+            }
+        });
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
+        } catch (ExecutionException e) {
+            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
         }
         return CommonReturnType.create(null);
     }
