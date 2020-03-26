@@ -40,7 +40,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
-    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BusinessException {
+    public OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount, String stockLogId) throws BusinessException {
         // 校验订单合法性，商品是否存在，用户是否合法、购买数量是否超出库存
         UserDTO userDTO = userDTOMapper.selectByPrimaryKey(userId);
         if (userDTO == null) {
@@ -56,10 +56,10 @@ public class OrderServiceImpl implements OrderService {
         }
         // 校验秒杀活动信息
         if (promoId == null || !promoId.equals(itemModel.getPromoModel().getId())) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"活动信息不正确");
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "活动信息不正确");
         }
         if (itemModel.getPromoModel().getStatus().intValue() != 2) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"活动信息还未开始");
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "活动信息还未开始");
         }
         // 校验通过，落单减库存
         boolean result = itemService.decreaseStock(itemId, amount);
@@ -69,9 +69,9 @@ public class OrderServiceImpl implements OrderService {
         // 订单入库
         OrderModel orderModel = new OrderModel();
         orderModel.setItemId(itemId);
-        if(promoId != null){
+        if (promoId != null) {
             orderModel.setItemPrice(itemModel.getPromoModel().getPromoItemPrice());
-        }else{
+        } else {
             orderModel.setItemPrice(itemModel.getPrice());
         }
         orderModel.setPromoId(promoId);

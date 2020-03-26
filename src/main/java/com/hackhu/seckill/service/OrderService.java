@@ -8,5 +8,5 @@ import com.hackhu.seckill.service.model.OrderModel;
  * @date 2020/3/1
  */
 public interface OrderService {
-    OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount) throws BusinessException;
+    OrderModel createOrder(Integer userId, Integer itemId, Integer promoId, Integer amount,String stockLogId) throws BusinessException;
 }
