@@ -12,7 +12,9 @@ public enum BusinessErrorEnum implements CommonError {
     USER_NOT_EXIST(10001, "用户不存在"),
     USER_NOT_LOGIN(10002, "用户未登录"),
     // 3000 开头为交易信息相关错误码
-    STOCK_NOT_ENOUGH(30001, "商品库存不足"),;
+    STOCK_NOT_ENOUGH(30001, "商品库存不足"),
+    MQ_SEND_FAIL(30002,"库存异步消息失败"),
+    RATELIMIT(30003,"当前活动参与人数过多，请稍后再试");
     private int errorCode;
     private String errorMsg;
 

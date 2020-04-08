@@ -8,6 +8,7 @@ import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.PromoService;
 import com.hackhu.seckill.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

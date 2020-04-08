@@ -9,6 +9,7 @@ import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.OrderService;
 import com.hackhu.seckill.service.PromoService;
+import com.hackhu.seckill.service.model.OrderModel;
 import com.hackhu.seckill.service.model.UserModel;
 import com.hackhu.seckill.utils.CodeUtils;
 import org.apache.catalina.User;
@@ -58,8 +59,8 @@ public class OrderController extends BaseController {
     /**
      *
      */
-    @RequestMapping(value = "/getSeckillToken", method = {RequestMethod.POST, RequestMethod.GET})
-    public void getSeckillToken(HttpServletResponse response) throws BusinessException, IOException {
+    @RequestMapping(value = "/generateverifycode", method = {RequestMethod.POST, RequestMethod.GET})
+    public void generateVerifyCode(HttpServletResponse response) throws BusinessException, IOException {
         String token = httpServletRequest.getParameterMap().get("token")[0];
         if (StringUtils.isEmpty(token)) {
             throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN);
@@ -106,12 +107,14 @@ public class OrderController extends BaseController {
 
     //封装下单请求
     @RequestMapping(value = "/createorder", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
-    @ResponseBody
     public CommonReturnType createOrder(@RequestParam(name = "itemId") Integer itemId,
                                         @RequestParam(name = "amount") Integer amount,
                                         @RequestParam(name = "promoId", required = false) Integer promoId,
                                         @RequestParam(name = "promoToken", required = false) String promoToken) throws BusinessException {
 
+        if (orderCreateRateLimiter.acquire() <= 0) {
+            throw new BusinessException(BusinessErrorEnum.RATELIMIT);
+        }
         Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("IS_LOGIN");
         if (isLogin == null || !isLogin.booleanValue()) {
             throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN, "用户还未登陆，不能下单");
@@ -119,9 +122,41 @@ public class OrderController extends BaseController {
 
         //获取用户的登陆信息
         UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("LOGIN_USER");
+        if (userModel == null) {
+            throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN);
+        }
 
-        OrderModel orderModel = orderService.createOrder(userModel.getId(), itemId, promoId, amount);
+        // 校验秒杀令牌有效性
+        if (promoId != null) {
+            String redisToken = (String) redisTemplate.opsForValue().get("promo_token_" + promoId + "_userid_" + userModel.getId() + "_itemid_" + itemId);
+            if (redisToken == null) {
+                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "秒杀令牌校验失败");
+            }
+            if (!StringUtils.equals(promoToken, redisToken)) {
+                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "秒杀令牌校验失败");
+            }
+        }
 
-        return CommonReturnType.create(orderModel);
+        // 拥塞队列泄洪
+        Future<Object> future = executorService.submit(() -> {
+            //加入库存流水init状态
+            String stockLogId = itemService.initStockLog(itemId, amount);
+
+
+            //再去完成对应的下单事务型消息机制
+            if (!rocketMQProducer.transactionAsyncReduceStock(userModel.getId(), itemId, promoId, amount, stockLogId)) {
+                throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR, "下单失败");
+            }
+            return null;
+        });
+
+        try {
+            future.get();
+        } catch (InterruptedException e) {
+            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
+        } catch (ExecutionException e) {
+            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
+        }
+        return CommonReturnType.create(null);
     }
 }
