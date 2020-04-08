@@ -54,7 +54,7 @@ public class UserController extends BaseController{
     /**
      * 用户注册接口
      */
-    @RequestMapping(value = "/register",method = RequestMethod.POST)
+    @RequestMapping(value = "/register", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType regiseter(@RequestParam(name = "telephone") String telephone,
                                       @RequestParam(name = "otpCode") String otpCode,
                                       @RequestParam(name = "name") String name,
@@ -81,24 +81,14 @@ public class UserController extends BaseController{
     /**
      * 用户登录接口
      */
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/login", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType login(@RequestParam(name = "telephone") String telephone,
                                   @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
-        if (StringUtils.isEmpty(telephone)||StringUtils.isEmpty(password)) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR);
-        }
         // 对用户密码加密存储
         UserModel result = userService.login(telephone, password);
         // 登录成功将凭证加入session
         if (result != null) {
-            // 生成登录凭证 token、uuid
-            String uuidToken = UUID.randomUUID().toString();
-            uuidToken = uuidToken.replace("-", "");
-            // 将 uuid 存入 redis
-            redisTemplate.opsForValue().set(uuidToken, result);
-            redisTemplate.expire(uuidToken, 1, TimeUnit.HOURS);
-//            this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
-            return CommonReturnType.create(uuidToken);
+            this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
         }
         return CommonReturnType.create(result);
     }

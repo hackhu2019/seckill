@@ -118,43 +118,10 @@ public class OrderController extends BaseController {
         }
 
         //获取用户的登陆信息
-        UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("LOGIN_USER");
-        if (userModel == null) {
-            throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN);
-        }
-        // 验证秒杀令牌合法性
-        if (promoId != null) {
-            String redisSeckillToken = (String) redisTemplate.opsForValue().get("promo_token_" + promoId + "_userid_" + userModel.getId() + "_itemid_" + itemId);
-            if (redisSeckillToken == null) {
-                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "令牌生成失败");
-            }
-            if (StringUtils.equals(promoToken, redisSeckillToken)) {
-                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "令牌生成失败");
-            }
-        }
-        // 队列泄洪
-        Future<Object> future=executorService.submit(new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                // 判断库存是否已售罄
-                if (redisTemplate.hasKey("promo_item_stock_invalid_" + itemId)) {
-                    throw new BusinessException(BusinessErrorEnum.STOCK_NOT_ENOUGH);
-                }
-                // 库存流水初始化
-                String stockLogId = itemService.initStockLog(itemId, amount);
-                if (!rocketMQProducer.transactionAsyncReduceStock(userModel.getId(), itemId, promoId, amount, stockLogId)) {
-                    throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR, "下单失败");
-                }
-                return null;
-            }
-        });
-        try {
-            future.get();
-        } catch (InterruptedException e) {
-            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
-        } catch (ExecutionException e) {
-            throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
-        }
-        return CommonReturnType.create(null);
+        UserModel userModel = (UserModel)httpServletRequest.getSession().getAttribute("LOGIN_USER");
+
+        OrderModel orderModel = orderService.createOrder(userModel.getId(), itemId, promoId, amount);
+
+        return CommonReturnType.create(orderModel);
     }
 }
