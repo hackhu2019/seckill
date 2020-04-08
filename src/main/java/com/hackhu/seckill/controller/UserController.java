@@ -51,7 +51,7 @@ public class UserController extends BaseController{
     /**
      * 用户注册接口
      */
-    @RequestMapping("/register")
+    @RequestMapping(value = "/register", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType regiseter(@RequestParam(name = "telephone") String telephone,
                                       @RequestParam(name = "otpCode") String otpCode,
                                       @RequestParam(name = "name") String name,
@@ -80,13 +80,13 @@ public class UserController extends BaseController{
     /**
      * 用户登录接口
      */
-    @RequestMapping("/login")
+    @RequestMapping(value = "/login", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType login(@RequestParam(name = "telephone") String telephone,
-                                      @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+                                  @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // 对用户密码加密存储
         UserModel result = userService.login(telephone, password);
         // 登录成功将凭证加入session
-        if (result!=null) {
+        if (result != null) {
             this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
         }
         return CommonReturnType.create(result);

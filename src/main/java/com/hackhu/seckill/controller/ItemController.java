@@ -6,10 +6,7 @@ import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.model.ItemModel;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
@@ -22,27 +19,27 @@ import java.util.stream.Collectors;
  */
 @RestController
 @RequestMapping("/item")
-@CrossOrigin(allowCredentials = "true",allowedHeaders = "*")
-public class ItemController extends BaseController{
+@CrossOrigin(allowCredentials = "true", allowedHeaders = "*")
+public class ItemController extends BaseController {
     @Resource
     private ItemService itemService;
 
-    @RequestMapping("/create")
+    @RequestMapping(value = "/create", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType create(ItemModel itemModel) throws BusinessException {
         boolean result = itemService.createItem(itemModel);
         return CommonReturnType.create(result);
     }
 
-    @RequestMapping("/detail")
+    @RequestMapping(value = "/detail", method = {RequestMethod.POST, RequestMethod.GET}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType detail(@RequestParam(name = "id") Integer itemId) throws BusinessException {
         ItemModel result = itemService.getItemDetailById(itemId);
         return CommonReturnType.create(result);
     }
 
-    @RequestMapping("/getAll")
+    @RequestMapping(value = "/getAll", method = {RequestMethod.POST, RequestMethod.GET}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType detail() throws BusinessException {
         List<ItemModel> itemList = itemService.getItemList();
-        List<ItemVO> itemVOS = itemList.stream().map(itemModel ->{
+        List<ItemVO> itemVOS = itemList.stream().map(itemModel -> {
             ItemVO itemVO = convertItemVOFromItemModel(itemModel);
             return itemVO;
         }).collect(Collectors.toList());
