@@ -20,19 +20,19 @@ public class BaseController {
     /**
      * 定义 exceptionHandler 处理未被 controller 层吸收的 exception
      */
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.OK)
-    public Object exceptionHandler(HttpServletRequest request, Exception e) {
-        Map<String, Object> responseMap = new HashMap<>();
-        if (e instanceof BusinessException) {
-            BusinessException businessException = (BusinessException) e;
-            responseMap.put("errorCode", businessException.getErrorCode());
-            responseMap.put("errorMsg", businessException.getErrorMsg());
-        } else {
-            responseMap.put("errorCode", BusinessErrorEnum.UNKNOW_ERROR.getErrorCode());
-            responseMap.put("errorMsg", BusinessErrorEnum.UNKNOW_ERROR.getErrorMsg());
-        }
-        CommonReturnType commonReturnType = CommonReturnType.create(responseMap, "fail");
-        return commonReturnType;
-    }
+//    @ExceptionHandler(Exception.class)
+//    @ResponseStatus(HttpStatus.OK)
+//    public Object exceptionHandler(HttpServletRequest request, Exception e) {
+//        Map<String, Object> responseMap = new HashMap<>();
+//        if (e instanceof BusinessException) {
+//            BusinessException businessException = (BusinessException) e;
+//            responseMap.put("errorCode", businessException.getErrorCode());
+//            responseMap.put("errorMsg", businessException.getErrorMsg());
+//        } else {
+//            responseMap.put("errorCode", BusinessErrorEnum.UNKNOWN_ERROR.getErrorCode());
+//            responseMap.put("errorMsg", BusinessErrorEnum.UNKNOWN_ERROR.getErrorMsg());
+//        }
+//        CommonReturnType commonReturnType = CommonReturnType.create(responseMap, "fail");
+//        return commonReturnType;
+//    }
 }

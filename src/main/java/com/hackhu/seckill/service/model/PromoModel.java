@@ -3,6 +3,7 @@ package com.hackhu.seckill.service.model;
 import lombok.Data;
 import org.joda.time.DateTime;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 /**
@@ -10,7 +11,7 @@ import java.math.BigDecimal;
  * @date 2020/3/11
  */
 @Data
-public class PromoModel {
+public class PromoModel implements Serializable {
     private Integer id;
     // 秒杀活动状态：1、未开始，2、进行中，3、已结束
     private Integer status;

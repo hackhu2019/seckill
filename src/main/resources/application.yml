@@ -1,10 +1,33 @@
 # \u914D\u7F6E\u6570\u636E\u5E93\u8FDE\u63A5
 spring:
   datasource:
-    url:  mysql://localhost:3306/seckill?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false
+    url: jdbc:mysql://localhost:3306/seckill?allowMultiQueries=true&useUnicode=true&serverTimezone=UTC&characterEncoding=UTF-8&useSSL=false
     username: root
     password: admin123
     driver-class-name: com.mysql.cj.jdbc.Driver
     name: seckill
     type: com.alibaba.druid.pool.DruidDataSource
-
+  mvc:
+    throw-exception-if-no-handler-found: true
+  resources:
+    add-mappings: false
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    database: 10
+    jedis:
+      pool:
+        max-active: 50
+        min-idle: 20
+mybatis:
+  mapper-locations: classpath:mapping/*.xml
+server:
+  tomcat:
+    accept-count: 1000
+    max-threads: 800
+    min-spare-threads: 100
+  port: 8090
+mq:
+  nameserver:
+    addr: 121.42.141.30:9876
+    topicname: TopicTTest

@@ -6,20 +6,18 @@ import com.hackhu.seckill.dto.UserDTO;
 import com.hackhu.seckill.dto.UserPasswordDTO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
-import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.UserService;
 import com.hackhu.seckill.service.model.UserModel;
 import com.hackhu.seckill.validator.ValidatorImpl;
 import com.hackhu.seckill.validator.ValidatorResult;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.dao.DuplicateKeyException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
 import javax.annotation.Resource;
-import javax.validation.Validator;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hackhu
@@ -33,14 +31,12 @@ public class UserServiceImpl implements UserService {
     private UserPasswordDTOMapper userPasswordDTOMapper;
     @Resource
     private ValidatorImpl validator;
+    @Resource
+    private RedisTemplate redisTemplate;
+    private String cachePrefix = "user_validate_";
     @Override
     public UserModel getUserById(Integer id) {
-        UserDTO userDTO = userDTOMapper.selectByPrimaryKey(id);
-        if (userDTO == null) {
-            return null;
-        }
-        UserPasswordDTO userPasswordDTO = userPasswordDTOMapper.selectByUserId(id);
-        return convertFromUserModel(userDTO,userPasswordDTO);
+        return getUserByIdInCache(id);
     }
 
     @Override
@@ -76,6 +72,17 @@ public class UserServiceImpl implements UserService {
         }
         UserPasswordDTO userPasswordDTO = userPasswordDTOMapper.selectByUserId(userDTO.getId());
         return userPasswordDTO != null && password.equals(userPasswordDTO.getEncrptPassword())?convertFromUserModel(userDTO,userPasswordDTO):null;
+    }
+
+    @Override
+    public UserModel getUserByIdInCache(Integer userId) {
+        UserModel userModel = (UserModel) redisTemplate.opsForValue().get(cachePrefix + userId);
+        if (userModel == null) {
+            userModel = convertFromUserModel(userDTOMapper.selectByPrimaryKey(userId), userPasswordDTOMapper.selectByUserId(userId));
+            redisTemplate.opsForValue().set(cachePrefix + userId, userModel);
+            redisTemplate.expire(cachePrefix + userId, 10, TimeUnit.MINUTES);
+        }
+        return userModel;
     }
 
     /**

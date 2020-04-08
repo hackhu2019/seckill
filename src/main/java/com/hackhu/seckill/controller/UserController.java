@@ -4,11 +4,13 @@ import com.alibaba.druid.util.StringUtils;
 import com.hackhu.seckill.controller.viewobject.UserVO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
+import com.hackhu.seckill.error.CommonError;
 import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.UserService;
 import com.hackhu.seckill.service.model.UserModel;
 import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +21,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hackhu
@@ -37,9 +37,12 @@ public class UserController extends BaseController{
     private UserService userService;
     @Resource
     private HttpServletRequest httpServletRequest;
+    @Resource
+    private RedisTemplate redisTemplate;
     private String salt = "hack-hu";
-    @RequestMapping("/get")
-    public CommonReturnType getUser(@RequestParam(name = "id")Integer id) throws BusinessException {
+
+    @RequestMapping(value = "/get", method = RequestMethod.GET)
+    public CommonReturnType getUser(@RequestParam(name = "id") Integer id) throws BusinessException {
         UserModel userModel = userService.getUserById(id);
         if (userModel == null) {
             throw new BusinessException(BusinessErrorEnum.USER_NOT_EXIST);
@@ -55,21 +58,19 @@ public class UserController extends BaseController{
     public CommonReturnType regiseter(@RequestParam(name = "telephone") String telephone,
                                       @RequestParam(name = "otpCode") String otpCode,
                                       @RequestParam(name = "name") String name,
-                                      @RequestParam(name = "gender") Byte gender,
+                                      @RequestParam(name = "gender") Integer gender,
                                       @RequestParam(name = "age") Integer age,
-                                      @RequestParam(name = "thirdPartyId") String thirdPartyId,
                                       @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // 验证短信验证码是否正确
         String sessionOTPCode = (String) httpServletRequest.getSession().getAttribute(telephone);
         if (!StringUtils.equals(otpCode,sessionOTPCode)){
-            return CommonReturnType.create(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR,"短信验证码不一致");
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "短信验证码不一致");
         }
         // 注册用户
         UserModel userModel = new UserModel();
         userModel.setName(name);
         userModel.setTelephone(telephone);
         userModel.setAge(age);
-        userModel.setThirdPartyId(thirdPartyId);
         userModel.setGender(gender);
         // 对用户密码加密存储
         userModel.setPassword(encodeByMD5(password));
@@ -103,7 +104,7 @@ public class UserController extends BaseController{
     /**
      * 用户获取otp短信接口
      */
-    @RequestMapping(value = "getotp",method = RequestMethod.POST,consumes = CONTENT_TYPE_FORMED)
+    @RequestMapping(value = "/getotp",method = RequestMethod.POST,consumes = CONTENT_TYPE_FORMED)
     public CommonReturnType getOTP(@RequestParam(name = "telephone")String telephone) {
          // 按照规则生成OTP验证码
         Random rd = new Random();

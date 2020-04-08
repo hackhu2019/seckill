@@ -2,21 +2,27 @@ package com.hackhu.seckill.service.impl;
 
 import com.hackhu.seckill.dao.ItemDTOMapper;
 import com.hackhu.seckill.dao.ItemStockDTOMapper;
+import com.hackhu.seckill.dao.StockLogDTOMapper;
 import com.hackhu.seckill.dto.ItemDTO;
 import com.hackhu.seckill.dto.ItemStockDTO;
+import com.hackhu.seckill.dto.StockLogDTO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
+import com.hackhu.seckill.mq.RocketMQProducer;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.model.ItemModel;
 import com.hackhu.seckill.validator.ValidatorImpl;
 import com.hackhu.seckill.validator.ValidatorResult;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author hackhu
@@ -31,6 +37,13 @@ public class ItemServiceImpl implements ItemService {
     private ItemStockDTOMapper itemStockDTOMapper;
     @Resource
     private ValidatorImpl validator;
+    @Resource
+    private RedisTemplate redisTemplate;
+    @Resource
+    private StockLogDTOMapper stockLogDTOMapper;
+    @Resource
+    private RocketMQProducer rocketMQProducer;
+    private String cachePrefix = "item_validate_";
     @Override
     public boolean createItem(ItemModel itemModel) throws BusinessException {
         // 校验 itemModel 参数合法性
@@ -75,32 +88,71 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemModel getItemDetailById(Integer itemId) throws BusinessException {
-        ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
-        if (itemDTO == null) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品id错误");
-        }
-        ItemStockDTO itemStockDTO = itemStockDTOMapper.selectByItemId(itemId);
-        ItemModel itemModel = convertItemModelFromItemDTOAndItemStockDTO(itemDTO, itemStockDTO);
-        return itemModel;
+        return getItemByIdInCache(itemId);
     }
 
     @Override
     @Transactional
     public boolean decreaseStock(Integer itemId, Integer amount) throws BusinessException {
-        int affectedRow =  itemStockDTOMapper.decreaseStock(itemId,amount);
-        if(affectedRow > 0){
-            //更新库存成功
+        Long resultLong = redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount.intValue() * -1);
+        if (resultLong > 0) {
+            // 库存更新成功
             return true;
-        }else{
-            //更新库存失败
+        } else if (resultLong == 0) {
+            // 库存已空
+            redisTemplate.opsForValue().set("promo_item_stock_invalid_" + itemId, "true");
+            return true;
+        } else {
+            // 更新库存异常
+            increaseStock(itemId, amount);
             return false;
         }
     }
 
     @Override
+    public boolean asyncDecreaseStock(Integer itemId, Integer amount) throws BusinessException {
+        boolean result = rocketMQProducer.asyncReduceStock(itemId, amount);
+        return result;
+    }
+
+    @Override
+    public boolean increaseStock(Integer itemId, Integer amount) throws BusinessException {
+        redisTemplate.opsForValue().increment("promo_item_stock_" + itemId, amount.intValue());
+        return true;
+    }
+    
+    @Override
+    @Transactional
     public boolean increaseSale(Integer itemId, Integer amount) throws BusinessException {
         boolean result = itemDTOMapper.increaseSales(itemId, amount);
         return result;
+    }
+
+    @Override
+    public String initStockLog(Integer itemId, Integer amount) {
+        StockLogDTO stockLogDTO = new StockLogDTO();
+        stockLogDTO.setItemId(itemId);
+        stockLogDTO.setAmount(amount);
+        stockLogDTO.setStockLogId(UUID.randomUUID().toString().replace("-", ""));
+        stockLogDTO.setStatus(1);
+        stockLogDTOMapper.insertSelective(stockLogDTO);
+        return stockLogDTO.getStockLogId();
+    }
+
+    @Override
+    public ItemModel getItemByIdInCache(Integer itemId) throws BusinessException {
+        ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get(cachePrefix + itemId);
+        if (itemId == null) {
+            ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
+            if (itemDTO == null) {
+                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品id错误");
+            }
+            ItemStockDTO itemStockDTO = itemStockDTOMapper.selectByItemId(itemId);
+            itemModel = convertItemModelFromItemDTOAndItemStockDTO(itemDTO, itemStockDTO);
+            redisTemplate.opsForValue().set(cachePrefix, itemModel);
+            redisTemplate.expire(cachePrefix + itemId, 10, TimeUnit.MINUTES);
+        }
+        return itemModel;
     }
 
     /**

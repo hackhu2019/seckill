@@ -36,14 +36,17 @@
         <!--<table tableName="item_stock" domainObjectName="ItemStockDTO" enableCountByExample="false"-->
                <!--enableUpdateByExample="false" enableDeleteByExample="false"-->
                <!--enableSelectByExample="false" selectByExampleQueryId="false" />-->
-        <table tableName="order_info" domainObjectName="OrderInfoDTO" enableCountByExample="false"
-               enableUpdateByExample="false" enableDeleteByExample="false"
-               enableSelectByExample="false" selectByExampleQueryId="false" />
+<!--        <table tableName="order_info" domainObjectName="OrderInfoDTO" enableCountByExample="false"-->
+<!--               enableUpdateByExample="false" enableDeleteByExample="false"-->
+<!--               enableSelectByExample="false" selectByExampleQueryId="false" />-->
 <!--        <table tableName="sequence_info" domainObjectName="SequenceInfoDTO" enableCountByExample="false"-->
 <!--               enableUpdateByExample="false" enableDeleteByExample="false"-->
 <!--               enableSelectByExample="false" selectByExampleQueryId="false" />-->
 <!--        <table tableName="promo" domainObjectName="PromoDTO" enableCountByExample="false"-->
 <!--               enableUpdateByExample="false" enableDeleteByExample="false"-->
 <!--               enableSelectByExample="false" selectByExampleQueryId="false" />-->
+        <table tableName="stock_log" domainObjectName="StockLogDTO" enableCountByExample="false"
+               enableUpdateByExample="false" enableDeleteByExample="false"
+               enableSelectByExample="false" selectByExampleQueryId="false" />
     </context>
 </generatorConfiguration>
