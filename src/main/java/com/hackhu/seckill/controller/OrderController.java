@@ -141,8 +141,6 @@ public class OrderController extends BaseController {
         Future<Object> future = executorService.submit(() -> {
             //加入库存流水init状态
             String stockLogId = itemService.initStockLog(itemId, amount);
-
-
             //再去完成对应的下单事务型消息机制
             if (!rocketMQProducer.transactionAsyncReduceStock(userModel.getId(), itemId, promoId, amount, stockLogId)) {
                 throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR, "下单失败");
