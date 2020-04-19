@@ -1,0 +1,15 @@
+.col-lg-4{
+    text-align: center;
+}
+
+.introduce {
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+.bg-cyan{
+    background-color: #00BCD4
+}
+.media img{
+    width: 32px;
+    height: 32px;
+}
