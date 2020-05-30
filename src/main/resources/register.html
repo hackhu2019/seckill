@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="author" content="Kodinger">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>秒杀系统用户注册</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="css/my-login.css">
+</head>
+<style>
+	.sendOtp {
+		font-size: 10px;
+	}
+</style>
+
+<body class="my-login-page">
+	<section class="h-100">
+		<div class="container h-100">
+			<div class="row justify-content-md-center h-100">
+				<div class="card-wrapper">
+					<div class="brand">
+						<img src="img/logo.jpg" alt="bootstrap 4 login page">
+					</div>
+					<div class="card fat">
+						<div class="card-body">
+							<h4 class="card-title">用户注册</h4>
+							<form method="POST" class="my-login-validation" novalidate="">
+
+								<div class="form-row">
+									<label for="telephone" class="col-md-12">手机号</label>
+									<div class="form-group col-md-9">
+										<input type="text" class="form-control" id="telephone" required autofocus>
+										<div class="invalid-feedback">
+											不要忘记输入你的手机号哦
+										</div>
+									</div>
+									<div class="form-group col-md-3 align-self-center">
+										<input type="button" class="btn btn-dark sendOtp" value="获取验证码"
+											onclick="countdownHandler(this)">
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="otpCode">手机验证码</label>
+									<input id="otpCode" type="text" class="form-control" name="otpCode" required>
+									<div class="invalid-feedback">
+										不要忘记输入验证码哦
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="gender">性别</label>
+									<select class="custom-select" id="gender">
+										<option value="1">男</option>
+										<option value="2">女</option>
+									</select>
+								</div>
+								
+								<div class="form-group">
+									<label for="name">用户名</label>
+									<input id="name" type="text" class="form-control" name="name" required>
+									<div class="invalid-feedback">
+										不要忘记写下你的用户名哦
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="age">年龄</label>
+									<input id="age" type="text" class="form-control" name="age" required>
+									<div class="invalid-feedback">
+										不要忘记写下你的年龄哦
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="password">密码</label>
+									<input id="password" type="password" class="form-control" name="password" required
+										data-eye>
+									<div class="invalid-feedback">
+										不要忘记写下你的密码哦
+									</div>
+								</div>
+
+								<div class="form-group m-0">
+									<button id="register" type="submit" class="btn btn-primary btn-block">
+										提交注册
+									</button>
+								</div>
+								<div class="mt-4 text-center">
+									已经有账号了? <a href="index.html">登录</a>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="footer">
+						Copyright &copy; 2020 &mdash; hack-hu专用
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+		integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+	</script> -->
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+	</script>
+	<script src="js/my-login.js"></script>
+	<script src="js/g_host.js"></script>
+	<script type="text/javascript">
+		var wait = 60;
+		var isFirst = true;
+		function countdownHandler(obj) {
+			if (wait == 0) {
+				obj.removeAttribute("disabled");
+				obj.value = "获取验证码";
+				wait = 60;
+				isFirst = true;
+			} else {
+				if (isFirst == true) {
+					var telephone = $("#telephone").val();
+					if (telephone == null || telephone == "") {
+						alert("手机号不能为空");
+						return;
+					}
+					console.log(telephone);
+					console.log($)
+					$.ajax({
+						type: "POST",
+						contentType: "application/x-www-form-urlencoded",
+						url: "http://"+host+"/user/getotp",
+						data: {
+							"telephone": telephone,
+						},
+						xhrFields: {
+							withCredentials: true
+						}
+					});
+					isFirst = false;
+				}
+				obj.setAttribute("disabled", true);
+				obj.value = "重新发送(" + wait + ")";
+				wait--;
+				setTimeout(function () {
+						countdownHandler(obj)
+					},
+					1000)
+			}
+		}
+
+		jQuery(document).ready(function () {
+			//绑定otp的click时间用于向后端发送获取手机验证码的请求
+			$("#register").on("click", function () {
+				var telephone = $("#telephone").val();
+				var password = $("#password").val();
+				var age = $("#age").val();
+				var gender = $('#gender').prop('selectedIndex');
+				var name = $("#name").val();
+				var otpCode = $("#otpCode").val();
+				console.log(telephone);
+				console.log(password);
+				console.log(gender);
+				console.log(age);
+				console.log(name);
+				console.log(otpCode);
+				$.ajax({
+					type: "POST",
+					contentType: "application/x-www-form-urlencoded",
+					url: "http://"+host+"/user/register",
+					data: {
+						"telephone": $("#telephone").val(),
+						"password": password,
+						"age": age,
+						"gender": gender,
+						"otpCode": otpCode,
+						"name": name
+					},
+					xhrFields: {
+						withCredentials: true
+					},
+					success: function (data) {
+						if (data.status == "success") {
+							alert("注册成功");
+							window.location.href = "./index.html";
+						} else {
+							alert("注册失败，原因为" + data.data.errMsg);
+						}
+					},
+					error: function (data) {
+						alert("注册失败，原因为" + data.responseText);
+					}
+				});
+				return false;
+			});
+		});
+	 </script>
+</body>
+
+</html>
