@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="./css/footer.css">
+    <link rel="stylesheet" href="./css/item-detail.css">
+    <title>商品详情页</title>
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-dark bg-danger flex-md-nowrap p-0 shadow">
+            <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="#">hack-hu秒杀系统</a>
+            <input class="form-control form-control-dark w-100" type="text" placeholder="查找商品" aria-label="Search">
+            <ul class="navbar-nav px-3">
+                <li class="nav-item">
+                    <a class="nav-link text-light" href="index.html">登录系统</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main class="container">
+        <ul class="list-group mb-2">
+            <li class="list-group-item mb-2">
+                <div class="row">
+                    <div class="col-md-2">
+                        <img src="./img/item/1-1.jpg" id="imgUrl" class="img-thumbnail">
+                    </div>
+                    <div class="info col-md-4 border-right">
+                        <h2><a class="text-dark" href="" id="title">四核八核i7吃鸡游戏组装电脑主机DIY独显LOL台式机办公i5整机全套</a></h2>
+                        
+                        <span id="stock">剩余库存：12309件</span><br>
+                        <span id="sales">交易量：7878</span><br>
+                        <div id="price">价格：<del>5888</del><span class="text-danger">秒杀价：2132</span></div>
+                        <div class="d-flex align-items-center clearfix" style="float: left; width: 4rem;">
+                            <div class="btn-group">
+                                <button type="button" id="createorder" class="btn btn-dark"    data-toggle="modal" data-target="#staticBackdrop">下单</button>
+                            </div>
+                        </div>
+                        <div  id="seckilTime"  class="text-danger"></div>
+                    </div>
+                    <div class="col-md-6 text-center">
+                        <h2 style="font-size:3em;">综合评分</h2>
+                        <strong style="font-size:2em;">4.8</strong><br>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 80%" aria-valuenow="50"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                            <strong> 物流</strong>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-warning" role="progressbar" style="width: 85%"
+                                aria-valuenow="50" aria-valuemin="0" aria-valuemax="100"></div>
+                            <strong> 卖家服务</strong>
+                        </div>
+                        <div class="progress mt-2">
+                            <div class="progress-bar bg-danger" role="progressbar" style="width: 70%" aria-valuenow="50"
+                                aria-valuemin="0" aria-valuemax="100"></div>
+                            <strong>与实物一致</strong>
+                        </div>
+                    </div>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <h2>宝贝详情</h2>
+                <div class="indent">
+                    <p>这款组装台式机，处理器使用AMD Ryzen5-3600，6核12线程，最大睿频4.2GHz，主板为微星 B450M MORTRA MAX，带散热马甲明星主板，显卡为七彩虹 战斧 GTX
+                        1660 SUPER，镁光8GB DDR4 3200 马甲内存，C9BJZ颗粒，主存储则是西数SN720 256GB
+                        M.2固态硬盘。机箱为鑫谷星魂RGB款，九州风神玄冰400四铜管散热，鑫谷GP600G黑金版 80Plus金牌电源，500w功率。
+                    </p>
+                    <p>25日开始预订，预订到手价5650有意可以关注。
+                    </p>
+                </div>
+            </li>
+            <li class="list-group-item">
+                <h2>公益计划</h2>
+                <div class="indent">
+                    <p>该商品参与了公益宝贝计划，卖家承诺每笔成交将为顶梁柱重病救助行动捐赠0.1元。该商品已累积捐赠196922笔。
+                    </p>
+                </div>
+            </li>
+            <li class="list-group-item tags">
+                <h2>相关标签</h2>
+                <span><a class="badge badge-success" href="">电脑</a></span>
+                <span><a class="badge badge-success" href="">显示器</a></span>
+                <span><a class="badge badge-success" href="">电源</a></span>
+                <span><a class="badge badge-success" href="">机箱</a></span>
+                <span><a class="badge badge-success" href="">内存条</a></span>
+                <span><a class="badge badge-success" href="">数据线</a></span>
+            </li>
+            <li class="list-group-item">
+                <h2>累计评价</h2>
+                <ul id="comment" class="list-group">
+                    <li class="list-group-item mb-1">
+                        <span class="comment-info">
+                            <a href="" class="badge badge-dark">沈邵君</a>
+                            <span> 2014-11-18</span>
+                        </span>
+                        <p class="mt-1">
+                            宝贝收到好快呀！前天买的今天就到了，直接插上就可以用了，试了一下很不错，比实体店便宜多了赞一个喜欢的亲们可以下手啊。</p>
+                    </li>
+                    <li class="list-group-item mb-1">
+                        <span class="comment-info">
+                            <a href="" class="badge badge-dark">黑点小虎</a>
+                            <span>2016-01-30</span>
+                        </span>
+                        <p class="mt-1">电脑不错，性价比高，用了一天才来评价，我选的套餐二，家用办公戳戳有余，连续开了5个视频，跟办公软件一点都不卡，总之推荐购买 </p>
+                    </li>
+                    <li class="list-group-item mb-1">
+                        <span class="comment-info">
+                            <a href="" class="badge badge-dark">JoJo</a>
+                            <span>2015-08-13</span>
+                        </span>
+                        <p class="mt-1">电脑不错，很静音，外观漂亮，重要的是好用，闪光的键盘鼠标晚上更漂亮！
+                        </p>
+                    </li>
+                    <li class="list-group-item mb-1">
+                        <span class="comment-info">
+                            <a href="" class="badge badge-dark">|′空絔</a>
+                            <span>2013-04-03 </span>
+                        </span>
+                        <p class="mt-1">
+                            电脑收到了，很细心的卖家，包装非常结实，自己动手，一次点亮，独立显卡，16g大运存，240g固态硬盘，电脑运行速度非常快，性价比极高，能玩游戏，给小孩上网课，办公的朋友可以放心购买！显示器是我家原来的，售后非常给力，会推荐给朋友的！
+                        </p>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </main>
+
+    <div class="modal fade" id="staticBackdrop" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="staticBackdropLabel">Modal title</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              ...
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              <button type="button" class="btn btn-primary">Understood</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    <div class="text-muted text-center bg-danger pt-2">
+        <div class="container text-light">
+            <ul class="bd-footer-links">
+                <li><a href="https://github.com/hackhu2019">GitHub&nbsp;</a></li>
+                <li><a href="https://blog.csdn.net/qq_38288847">CSDN&nbsp;</a></li>
+                <li><a href="https://www.zhihu.com/people/hu-hao-77-99/columns">码农学习之路</a></li>
+            </ul>
+            版权所有 © 秒杀系统　浙ICP备20010562号　制作维护：hack-hu　推荐使用chrome浏览器
+        </div>
+    </div>
+    <!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+    </script> -->
+    <!-- <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script> -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+    </script>
+    <script src="js/g_host.js"></script>
+    <script>
+        // $("#createorder").click(function(){
+
+        // });
+
+        function getParam(paramName) {
+            paramValue = "", isFound = !1;
+            if (this.location.search.indexOf("?") == 0 && this.location.search.indexOf("=") > 1) {
+                arrSource = unescape(this.location.search).substring(1, this.location.search.length).split("&"), i = 0;
+                while (i < arrSource.length && !isFound) arrSource[i].indexOf("=") > 0 && arrSource[i].split("=")[0]
+                    .toLowerCase() == paramName.toLowerCase() && (paramValue = arrSource[i].split("=")[1], isFound = !
+                    0), i++
+            }
+            return paramValue == "" && (paramValue = null), paramValue
+        }
+
+        var g_itemVO = {};
+        let timer =null
+        let startTime=20
+        function hasInit() {
+            var isInit = $("#isInit").val();
+            return isInit;
+        }
+
+        function setHasInit() {
+            $("#isInit").val("1");
+        }
+
+        function initView() {
+            var isInit = hasInit();
+            if (isInit == "1") {
+                return;
+            }
+            //获取商品详情
+            $.ajax({
+                type: "GET",
+                contentType: "application/x-www-form-urlencoded",
+                url: "http://" + host + "/item/detail",
+                data: {
+                    "id": getParam("id"),
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data) {
+                    console.log(data)
+                    if (data.status == "success") {
+                        g_itemVO = data.data;
+                        reloadDom();
+                        // 判断是否是秒杀商品
+                        isSeckilPage(g_itemVO.promoId,g_itemVO.id)
+                        
+                        setInterval(reloadDom, 1000);
+                        setHasInit();
+                    } else {
+                        alert("获取信息失败，原因为" + data.data.errMsg);
+                    }
+                },
+                error: function (data) {
+                    alert("获取信息失败，原因为" + data.responseText);
+                }
+            });
+        }
+
+        function isSeckilPage(promoId,id){
+            if(!promoId){ //是秒杀页
+                window.location.href = "item-seckill.html?id=" + id;
+            }
+        }
+
+        jQuery(document).ready(function () {
+            $("#verifyButton").on("click", function () {
+                var token = window.localStorage["token"];
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/x-www-form-urlencoded",
+                    url: "http://" + g_host + "/order/generatetoken?token=" + token,
+                    data: {
+                        "itemId": g_itemVO.id,
+                        "promoId": g_itemVO.promoId,
+                        "verifyCode": $("#verifyContent").val()
+                    },
+                    xhrFields: {
+                        withCredentials: true
+                    },
+                    success: function (data) {
+                        if (data.status == "success") {
+                            var promoToken = data.data;
+                            $.ajax({
+                                type: "POST",
+                                contentType: "application/x-www-form-urlencoded",
+                                url: "http://" + g_host +
+                                    "/order/createorder?token=" + token,
+                                data: {
+                                    "itemId": g_itemVO.id,
+                                    "amount": 1,
+                                    "promoId": g_itemVO.promoId,
+                                    "promoToken": promoToken
+                                },
+                                xhrFields: {
+                                    withCredentials: true
+                                },
+                                success: function (data) {
+                                    if (data.status == "success") {
+                                        alert("下单成功");
+                                        window.location.reload();
+                                    } else {
+                                        alert("下单失败，原因为" + data.data.errMsg);
+                                        if (data.data.errCode == 20003) {
+                                            window.location.href = "login.html";
+                                        }
+                                    }
+                                },
+                                error: function (data) {
+                                    alert("下单失败，原因为" + data.responseText);
+                                }
+                            });
+
+
+                        } else {
+                            alert("获取令牌失败，原因为" + data.data.errMsg);
+                            if (data.data.errCode == 20003) {
+                                window.location.href = "login.html";
+                            }
+                        }
+                    },
+                    error: function (data) {
+                        alert("获取令牌失败，原因为" + data.responseText);
+                    }
+                });
+
+            });
+
+            $("#createorder").on("click", function () {
+                var token = window.localStorage["token"];
+                if (token == null) {
+                    alert("没有登录，不能下单");
+                    window.location.href = "login.html";
+                    return false;
+                }else{
+                    $.ajax({
+                type: "POST",
+                contentType: "application/x-www-form-urlencoded",
+                url: "http://" + host + "/order/createorder",
+                data: {
+                    "itemId": getParam("id"),
+                    // "promoId":
+                },
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data) {
+                    console.log(data)
+                    if (data.status == "success") {
+                        alert("下单成功");
+                    } else {
+                        alert("下单失败，原因为" + data.data.errMsg);
+                    }
+                },
+                error: function (data) {
+                    alert("下单失败，原因为" + data.responseText);
+                }
+            });
+                }
+                $("#verifyDiv img").attr("src", "http://" + host +
+                    "/order/createorder?token=" + token);
+                $("#verifyDiv").show();
+
+            });
+
+
+
+
+            // $("#createorder").on("click", function () {
+            //     var token = window.localStorage["token"];
+            //     if (token == null) {
+            //         alert("没有登录，不能下单");
+            //         window.location.href = "login.html";
+            //         return false;
+            //     }else{
+            //         $.ajax({
+            //     type: "POST",
+            //     contentType: "application/x-www-form-urlencoded",
+            //     url: "http://" + host + "/order/createorder",
+            //     data: {
+            //         "itemId": getParam("id"),
+            //         amount:1,
+            //     },
+            //     xhrFields: {
+            //         withCredentials: true
+            //     },
+            //     success: function (data) {
+            //         console.log(data)
+            //         if (data.status == "success") {
+            //             alert("下单成功");
+            //         } else {
+            //             alert("下单失败，原因为" + data.data.errMsg);
+            //         }
+            //     },
+            //     error: function (data) {
+            //         alert("下单失败，原因为" + data.responseText);
+            //     }
+            // });
+            //     }
+            //     $("#verifyDiv img").attr("src", "http://" + host +
+            //         "/order/createorder?token=" + token);
+            //     $("#verifyDiv").show();
+
+            // });
+
+            initView();
+
+
+        });
+
+        function reloadDom() {
+            
+            $("#title").text(g_itemVO.title);
+            $("#description").text(g_itemVO.description);
+            $("#stock").text(`库存：${g_itemVO.stock}`);
+            if(!g_itemVO.promoId){
+
+            }else{
+                $("#price").text(`价格：${g_itemVO.price}`);
+            }
+            
+            $("#imgUrl").attr("src", g_itemVO.imgUrl);
+            $("#sales").text(`销量：${g_itemVO.sales}`);
+
+
+            if (g_itemVO.promoStatus == 1) {
+                //秒杀活动还未开始
+                var startTime = g_itemVO.startDate.replace(new RegExp("-", "gm"), "/");
+                startTime = (new Date(startTime)).getTime();
+                var nowTime = Date.parse(new Date());
+                var delta = (startTime - nowTime) / 1000;
+
+                if (delta <= 0) {
+                    //活动开始了
+                    g_itemVO.promoStatus = 2;
+                    reloadDom();
+                }
+                $("#promoStartDate").text("秒杀活动将于： " + g_itemVO.startDate + " 开始售卖 倒计时：" + delta + " 秒");
+                $("#promoPrice").text(g_itemVO.promoPrice);
+
+                $("#createorder").attr("disabled", true);
+            } else if (g_itemVO.promoStatus == 2) {
+                //秒杀活动正在进行中
+                $("#promoStartDate").text("秒杀正在进行中");
+                $("#promoPrice").text(g_itemVO.promoPrice);
+
+                $("#createorder").attr("disabled", false);
+                $("#normalPriceContainer").hide();
+            }
+        }
+    </script>
+</body>
+
+</html>
