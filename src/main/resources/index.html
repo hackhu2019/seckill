@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="utf-8">
+	<meta name="author" content="Kodinger">
+	<meta name="viewport" content="width=device-width,initial-scale=1">
+	<title>秒杀系统登陆页</title>
+	<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+		integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="css/my-login.css">
+</head>
+
+<body class="my-login-page">
+	<section class="h-100">
+		<div class="container h-100">
+			<div class="row justify-content-md-center h-100">
+				<div class="card-wrapper">
+					<div class="brand">
+						<img src="img/logo.jpg" alt="logo">
+					</div>
+					<div class="card fat">
+						<div class="card-body">
+							<h4 class="card-title">登录秒杀系统</h4>
+							<form method="POST" class="my-login-validation" novalidate="">
+								<div class="form-group">
+									<label for="email">手机号</label>
+									<input id="telephone"" type="text" class="form-control" name="telephone" value="" required
+										autofocus placeholder="请输入你的手机号" />
+									<div class="invalid-feedback">
+										请输入正确的邮箱地址
+									</div>
+								</div>
+
+								<div class="form-group">
+									<label for="password">输入密码
+										<a href="forgot.html" class="float-right">
+											忘记密码?
+										</a>
+									</label>
+									<input id="password" type="password" class="form-control" name="password" required
+										data-eye>
+									<div class="invalid-feedback">
+										不要忘记输入密码哦
+									</div>
+								</div>
+
+								<div class="form-group">
+									<div class="custom-checkbox custom-control">
+										<input type="checkbox" name="remember" id="remember"
+											class="custom-control-input">
+										<label for="remember" class="custom-control-label">记住密码</label>
+									</div>
+								</div>
+
+								<div class="form-group m-0">
+									<input type="button" id="login" class="btn btn-primary btn-block" value="登陆"/>
+								</div>
+								<div class="mt-4 text-center">
+									还没有账号? <a href="register.html">注册</a>
+								</div>
+							</form>
+						</div>
+					</div>
+					<div class="footer">
+						Copyright &copy; 2020 &mdash; hack-hu专用
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+		integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous">
+	</script>
+	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+		integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+	</script>
+	<script src="js/my-login.js"></script>
+</body>
+<script src="js/g_host.js"></script>
+<script>
+	jQuery(document).ready(function () {
+		// $("#register").on("click",function(){
+		// 	window.location.href="getotp.html";
+		// });
+
+
+		$("#login").on("click", function (e) {
+			//e.defaultPrevented()
+			var telephone = $("#telephone").val();
+			var password = $("#password").val();
+			if (telephone == null || telephone == "") {
+				alert("手机号不能为空");
+				return false;
+			}
+			if (password == null || password == "") {
+				alert("密码不能为空");
+				return false;
+			}
+
+			$.ajax({
+				type: "POST",
+				contentType: "application/x-www-form-urlencoded",
+				url: "http://" + host + "/user/login",
+				data: {
+					"telephone": telephone,
+					"password": password
+				},
+				xhrFields: {
+					withCredentials: true
+				},
+				success: function (data) {
+					console.log(data);
+					if (data.status == "success") {
+						alert("登陆成功");
+						var token = data.data;
+						window.localStorage["token"] = token;
+						window.location.href = "productList.html";
+					} else {
+						alert("登陆失败，原因为" + data.data.errMsg);
+					}
+				},
+				error: function (data) {
+					alert("登陆失败，原因为" + data.responseText);
+				}
+			});
+			return false;
+		});
+	});
+</script>
+
+</html>
