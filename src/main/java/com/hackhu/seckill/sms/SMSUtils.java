@@ -16,8 +16,8 @@ import javax.annotation.PostConstruct;
  */
 @Component
 public class SMSUtils {
-    private static String secretId="AKIDoQrdGlNC93ls35ejLl282jKaf2E0LL4e";
-    private static String secretKey="rUqa4HDsNlDNN7Zjb2vKSIuOby90atug";
+    private static String secretId="";
+    private static String secretKey="";
     private static String region="ap-guangzhou";
     private static String appId="1400373529";
     private static String sign="hackhu学习编程";
