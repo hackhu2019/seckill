@@ -1,5 +1,6 @@
 package com.hackhu.seckill.service;
 
+import com.hackhu.seckill.controller.viewobject.Page;
 import com.hackhu.seckill.dto.UserDTO;
 import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.service.model.UserModel;
@@ -15,6 +16,7 @@ public interface UserService {
 
     UserModel login(String telephone, String password) throws BusinessException;
 
+    Page getAll(Integer index, Integer pageSize);
     /**
      * 从缓存中获取用户对象
      */

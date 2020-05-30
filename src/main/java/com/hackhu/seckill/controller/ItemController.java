@@ -1,6 +1,7 @@
 package com.hackhu.seckill.controller;
 
 import com.hackhu.seckill.controller.viewobject.ItemVO;
+import com.hackhu.seckill.controller.viewobject.Page;
 import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.CacheService;
@@ -61,14 +62,28 @@ public class ItemController extends BaseController {
         return CommonReturnType.create(itemVO);
     }
 
+    @RequestMapping(value = "/delete", method = {RequestMethod.POST, RequestMethod.GET}, consumes = {CONTENT_TYPE_FORMED})
+    public CommonReturnType delete(@RequestParam(name = "id") Integer itemId) throws BusinessException {
+        itemService.deleteById(itemId);
+        return CommonReturnType.create(null);
+    }
+
     @RequestMapping(value = "/getAll", method = {RequestMethod.POST, RequestMethod.GET}, consumes = {CONTENT_TYPE_FORMED})
-    public CommonReturnType detail() throws BusinessException {
+    public CommonReturnType getAll() throws BusinessException {
         List<ItemModel> itemList = itemService.getItemList();
         List<ItemVO> itemVOS = itemList.stream().map(itemModel -> {
             ItemVO itemVO = convertItemVOFromItemModel(itemModel);
             return itemVO;
         }).collect(Collectors.toList());
         return CommonReturnType.create(itemVOS);
+    }
+
+    @RequestMapping(value = "/find", method = {RequestMethod.GET})
+    public CommonReturnType find(@RequestParam(name = "page") Integer page, @RequestParam(name = "pageSize") Integer pageSize) throws BusinessException {
+        Page pageInfo = new Page();
+        pageInfo.setSize((long) itemService.getItemList().size());
+        pageInfo.setObject(itemService.getItemList(page, pageSize));
+        return CommonReturnType.create(pageInfo);
     }
 
     private ItemVO convertItemVOFromItemModel(ItemModel itemModel) {

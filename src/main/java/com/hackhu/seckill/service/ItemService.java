@@ -20,6 +20,8 @@ public interface ItemService {
      */
     List<ItemModel> getItemList();
 
+    List<ItemModel> getItemList(Integer index, Integer pageSize);
+
     /**
      * 商品详情展示
      */
@@ -52,4 +54,6 @@ public interface ItemService {
      * 从缓存中获取 itemModel
      */
     ItemModel getItemByIdInCache(Integer itemId) throws BusinessException;
+
+    void deleteById(Integer id) throws BusinessException;
 }

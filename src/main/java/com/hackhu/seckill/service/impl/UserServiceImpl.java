@@ -1,5 +1,6 @@
 package com.hackhu.seckill.service.impl;
 
+import com.hackhu.seckill.controller.viewobject.Page;
 import com.hackhu.seckill.dao.UserDTOMapper;
 import com.hackhu.seckill.dao.UserPasswordDTOMapper;
 import com.hackhu.seckill.dto.UserDTO;
@@ -72,6 +73,14 @@ public class UserServiceImpl implements UserService {
         }
         UserPasswordDTO userPasswordDTO = userPasswordDTOMapper.selectByUserId(userDTO.getId());
         return userPasswordDTO != null && password.equals(userPasswordDTO.getEncrptPassword())?convertFromUserModel(userDTO,userPasswordDTO):null;
+    }
+
+    @Override
+    public Page getAll(Integer index, Integer pageSize) {
+        Page page = new Page();
+        page.setSize(userDTOMapper.count());
+        page.setObject(userDTOMapper.selectAll(index * pageSize + 1, pageSize));
+        return page;
     }
 
     @Override

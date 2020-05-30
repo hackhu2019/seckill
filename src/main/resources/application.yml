@@ -12,7 +12,7 @@ spring:
   resources:
     add-mappings: false
   redis:
-    host: 127.0.0.1
+    host: 47.98.166.141
     port: 6379
     database: 10
     jedis:
@@ -29,5 +29,13 @@ server:
   port: 8090
 mq:
   nameserver:
-    addr: 121.42.141.30:9876
-    topicname: TopicTTest
+    addr: 47.98.166.141:9876
+    topicname: TopicTest
+sms:
+  secretId: AKIDoQrdGlNC93ls35ejLl282jKaf2E0LL4e
+  secretKey: rUqa4HDsNlDNN7Zjb2vKSIuOby90atug
+  region: ap-guangzhou
+  appId: 1400373529
+  sign: hackhu学习编程
+  senderId:
+  templateId: 611968

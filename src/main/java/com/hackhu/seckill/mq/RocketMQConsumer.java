@@ -27,7 +27,7 @@ public class RocketMQConsumer {
     private DefaultMQPushConsumer rocketMQConsumer;
     @Value("${mq.nameserver.addr}")
     private String nameAddr;
-    @Value("${mq.topicname}")
+    @Value("${mq.nameserver.topicname}")
     private String topicName;
     @Resource
     private ItemStockDTOMapper itemStockDTOMapper;

@@ -1,6 +1,7 @@
 package com.hackhu.seckill.service.impl;
 
 import com.fasterxml.jackson.databind.util.BeanUtil;
+import com.hackhu.seckill.controller.viewobject.Page;
 import com.hackhu.seckill.dao.*;
 import com.hackhu.seckill.dto.*;
 import com.hackhu.seckill.error.BusinessErrorEnum;
@@ -92,6 +93,14 @@ public class OrderServiceImpl implements OrderService {
         stockLogDTO.setStatus(2);
         stockLogDTOMapper.updateByPrimaryKeySelective(stockLogDTO);
         return convertOrderModerFromOrderInfo(orderInfoDTO);
+    }
+
+    @Override
+    public Page getAll(Integer index, Integer pageSize) {
+        Page pageInfo = new Page();
+        pageInfo.setSize(orderInfoDTOMapper.getLen());
+        pageInfo.setObject(orderInfoDTOMapper.getList(index * pageSize + 1, pageSize));
+        return pageInfo;
     }
 
     private OrderInfoDTO convertFromOrderModel(OrderModel orderModel) {

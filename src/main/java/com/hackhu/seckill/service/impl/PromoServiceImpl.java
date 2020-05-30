@@ -5,6 +5,7 @@ import com.hackhu.seckill.dao.ItemDTOMapper;
 import com.hackhu.seckill.dao.PromoDTOMapper;
 import com.hackhu.seckill.dto.ItemDTO;
 import com.hackhu.seckill.dto.PromoDTO;
+import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.PromoService;
@@ -15,6 +16,7 @@ import com.hackhu.seckill.service.model.UserModel;
 import org.joda.time.DateTime;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -25,6 +27,7 @@ import java.util.concurrent.TimeUnit;
  * @author hackhu
  * @date 2020/3/11
  */
+@Service
 public class PromoServiceImpl implements PromoService {
     @Resource
     private PromoDTOMapper promoDTOMapper;
@@ -70,10 +73,10 @@ public class PromoServiceImpl implements PromoService {
     }
 
     @Override
-    public String generateSeckillToken(Integer promId, Integer itemId, Integer userId) {
+    public String generateSeckillToken(Integer promId, Integer itemId, Integer userId) throws BusinessException {
         // 判断库存是否售罄
         if (redisTemplate.hasKey("promo_item_stock_invalid_" + itemId)) {
-            return null;
+            throw new BusinessException(BusinessErrorEnum.STOCK_NOT_ENOUGH);
         }
         PromoDTO promoDTO = promoDTOMapper.selectByPrimaryKey(promId);
         PromoModel promoModel = convertFromPromoDTO(promoDTO);

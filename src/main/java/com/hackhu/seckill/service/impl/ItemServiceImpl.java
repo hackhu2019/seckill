@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author hackhu
@@ -87,6 +88,17 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    public List<ItemModel> getItemList(Integer index, Integer pageSize) {
+        List<ItemDTO> itemDTOS = itemDTOMapper.find(index * pageSize + 1, pageSize);
+        List<ItemModel> itemModelList =  itemDTOS.stream().map(itemDO -> {
+            ItemStockDTO itemStockDO = itemStockDTOMapper.selectByItemId(itemDO.getId());
+            ItemModel itemModel = this.convertItemModelFromItemDTOAndItemStockDTO(itemDO,itemStockDO);
+            return itemModel;
+        }).collect(Collectors.toList());
+        return itemModelList;
+    }
+
+    @Override
     public ItemModel getItemDetailById(Integer itemId) throws BusinessException {
         return getItemByIdInCache(itemId);
     }
@@ -142,7 +154,7 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public ItemModel getItemByIdInCache(Integer itemId) throws BusinessException {
         ItemModel itemModel = (ItemModel) redisTemplate.opsForValue().get(cachePrefix + itemId);
-        if (itemId == null) {
+        if (itemModel == null) {
             ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(itemId);
             if (itemDTO == null) {
                 throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "商品id错误");
@@ -153,6 +165,16 @@ public class ItemServiceImpl implements ItemService {
             redisTemplate.expire(cachePrefix + itemId, 10, TimeUnit.MINUTES);
         }
         return itemModel;
+    }
+
+    @Override
+    public void deleteById(Integer id) throws BusinessException {
+        ItemDTO itemDTO = itemDTOMapper.selectByPrimaryKey(id);
+        if (itemDTO == null) {
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "订单不存在");
+        }
+        itemDTOMapper.deleteByPrimaryKey(id);
+        itemStockDTOMapper.deleteByItemId(id);
     }
 
     /**
@@ -176,6 +198,7 @@ public class ItemServiceImpl implements ItemService {
     private ItemModel convertItemModelFromItemDTOAndItemStockDTO(ItemDTO itemDTO, ItemStockDTO itemStockDTO) {
         ItemModel itemModel = new ItemModel();
         BeanUtils.copyProperties(itemDTO, itemModel);
+        itemModel.setImgUrl(itemDTO.getImgUrl());
         itemModel.setStock(itemStockDTO.getStock());
         return itemModel;
     }

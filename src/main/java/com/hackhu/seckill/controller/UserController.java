@@ -1,27 +1,27 @@
 package com.hackhu.seckill.controller;
 
 import com.alibaba.druid.util.StringUtils;
+import com.hackhu.seckill.controller.viewobject.Page;
 import com.hackhu.seckill.controller.viewobject.UserVO;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
-import com.hackhu.seckill.error.CommonError;
 import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.UserService;
 import com.hackhu.seckill.service.model.UserModel;
-import org.apache.tomcat.util.security.MD5Encoder;
+import com.hackhu.seckill.sms.SMSUtils;
+import com.hackhu.seckill.utils.EncodeUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import javax.xml.crypto.Data;
 import java.io.UnsupportedEncodingException;
-import java.net.Socket;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.*;
+import java.util.Base64;
+import java.util.Random;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -50,6 +50,10 @@ public class UserController extends BaseController{
         UserVO userVO = convertFromModel(userModel);
         return CommonReturnType.create(userVO);
     }
+    @RequestMapping(value = "/find", method = RequestMethod.GET)
+    public CommonReturnType find() throws BusinessException {
+        return CommonReturnType.create(userService.getAll(0,100));
+    }
 
     /**
      * 用户注册接口
@@ -63,9 +67,9 @@ public class UserController extends BaseController{
                                       @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
         // 验证短信验证码是否正确
         String sessionOTPCode = (String) httpServletRequest.getSession().getAttribute(telephone);
-        if (!StringUtils.equals(otpCode,sessionOTPCode)){
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "短信验证码不一致");
-        }
+//            if (!StringUtils.equals(otpCode,sessionOTPCode)){
+//                throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "短信验证码不一致");
+//            }
         // 注册用户
         UserModel userModel = new UserModel();
         userModel.setName(name);
@@ -84,13 +88,23 @@ public class UserController extends BaseController{
     @RequestMapping(value = "/login", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType login(@RequestParam(name = "telephone") String telephone,
                                   @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
-        // 对用户密码加密存储
-        UserModel result = userService.login(telephone, password);
-        // 登录成功将凭证加入session
-        if (result != null) {
-            this.httpServletRequest.getSession().setAttribute("IS_LOGIN", true);
+        //入参校验
+        if(org.apache.commons.lang3.StringUtils.isEmpty(telephone)||
+                org.springframework.util.StringUtils.isEmpty(password)){
+            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR);
         }
-        return CommonReturnType.create(result);
+
+        //用户登陆服务,用来校验用户登陆是否合法
+        UserModel userModel = userService.login(telephone, EncodeUtil.EncodeByMd5(password));
+
+        //生成登录凭证token，UUID
+        String uuidToken = UUID.randomUUID().toString();
+        uuidToken = uuidToken.replace("-","");
+        //将登陆凭证加入到用户登陆成功的session内
+        httpServletRequest.getSession().setAttribute("token", uuidToken);
+        redisTemplate.opsForValue().set(uuidToken,userModel);
+        redisTemplate.expire(uuidToken,1, TimeUnit.HOURS);
+        return CommonReturnType.create(null);
     }
 
     /**
@@ -114,7 +128,7 @@ public class UserController extends BaseController{
         // 将OTP验证码与用户手机号关联
         httpServletRequest.getSession().setAttribute(telephone, otpCode);
         // 将OTP验证码发送至用户
-        System.out.println("telephone:" + telephone + ",otpCode:" + otpCode);
+        SMSUtils.sendSMS(telephone, otpCode);
         return CommonReturnType.create(null);
     }
     /**

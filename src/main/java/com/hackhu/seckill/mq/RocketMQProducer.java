@@ -34,7 +34,7 @@ public class RocketMQProducer {
     private StockLogDTOMapper stockLogDTOMapper;
     @Value("${mq.nameserver.addr}")
     private String nameAddr;
-    @Value("${mq.topicname}")
+    @Value("${mq.nameserver.topicname}")
     private String topicName;
 
     @PostConstruct
@@ -43,6 +43,11 @@ public class RocketMQProducer {
         producer = new DefaultMQProducer("producer_group");
         producer.setNamesrvAddr(nameAddr);
         producer.start();
+
+        transactionMQProducer = new TransactionMQProducer("transaction_producer_group");
+        transactionMQProducer.setNamesrvAddr(nameAddr);
+        transactionMQProducer.start();
+        
         transactionMQProducer.setTransactionListener(new TransactionListener() {
             @Override
             public LocalTransactionState executeLocalTransaction(Message message, Object o) {

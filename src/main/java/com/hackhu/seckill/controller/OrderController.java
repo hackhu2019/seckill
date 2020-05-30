@@ -2,6 +2,7 @@ package com.hackhu.seckill.controller;
 
 import com.alibaba.druid.util.StringUtils;
 import com.google.common.util.concurrent.RateLimiter;
+import com.hackhu.seckill.controller.viewobject.Page;
 import com.hackhu.seckill.error.BusinessErrorEnum;
 import com.hackhu.seckill.error.BusinessException;
 import com.hackhu.seckill.mq.RocketMQProducer;
@@ -9,6 +10,7 @@ import com.hackhu.seckill.response.CommonReturnType;
 import com.hackhu.seckill.service.ItemService;
 import com.hackhu.seckill.service.OrderService;
 import com.hackhu.seckill.service.PromoService;
+import com.hackhu.seckill.service.model.ItemModel;
 import com.hackhu.seckill.service.model.OrderModel;
 import com.hackhu.seckill.service.model.UserModel;
 import com.hackhu.seckill.utils.CodeUtils;
@@ -52,7 +54,7 @@ public class OrderController extends BaseController {
 
     @PostConstruct
     public void init() {
-        executorService = Executors.newFixedThreadPool(20);
+        executorService = Executors.newFixedThreadPool(30);
         orderCreateRateLimiter = RateLimiter.create(10);
     }
 
@@ -81,8 +83,7 @@ public class OrderController extends BaseController {
      */
     @RequestMapping(value = "/getSeckillToken", method = {RequestMethod.POST}, consumes = {CONTENT_TYPE_FORMED})
     public CommonReturnType getSeckillToken(@RequestParam(name = "itemId") Integer itemId,
-                                            @RequestParam(name = "promoId") Integer promoId,
-                                            @RequestParam(name = "verifyCode") String verifyCode) throws BusinessException {
+                                            @RequestParam(name = "promoId") Integer promoId) throws BusinessException {
         // 根据 token 获取用户信息
         String token = httpServletRequest.getParameterMap().get("token")[0];
         if (StringUtils.isEmpty(token)) {
@@ -93,10 +94,10 @@ public class OrderController extends BaseController {
             throw new BusinessException(BusinessErrorEnum.USER_NOT_LOGIN);
         }
         // 检测验证码有效性
-        String redisVerifyCode = (String) redisTemplate.opsForValue().get("verify_code_" + userModel.getId());
-        if (!StringUtils.equals(redisVerifyCode, verifyCode)) {
-            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "验证码不合法");
-        }
+//        String redisVerifyCode = (String) redisTemplate.opsForValue().get("verify_code_" + userModel.getId());
+//        if (!StringUtils.equals(redisVerifyCode, verifyCode)) {
+//            throw new BusinessException(BusinessErrorEnum.PARAMETER_VALIDATION_ERROR, "验证码不合法");
+//        }
         // 获取秒杀令牌
         String seckillToken = promoService.generateSeckillToken(promoId, itemId, userModel.getId());
         if (seckillToken == null) {
@@ -156,5 +157,10 @@ public class OrderController extends BaseController {
             throw new BusinessException(BusinessErrorEnum.UNKNOWN_ERROR);
         }
         return CommonReturnType.create(null);
+    }
+    @RequestMapping(value = "/find", method = {RequestMethod.GET})
+    public CommonReturnType find(@RequestParam(name = "page") Integer page, @RequestParam(name = "pageSize") Integer pageSize) throws BusinessException {
+        Page pageInfo = orderService.getAll(page, pageSize);
+        return CommonReturnType.create(pageInfo);
     }
 }

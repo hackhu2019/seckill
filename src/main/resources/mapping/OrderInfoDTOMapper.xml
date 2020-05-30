@@ -42,6 +42,16 @@
     from order_info
     where id = #{id,jdbcType=INTEGER}
   </select>
+    <select id="getLen" resultType="java.lang.Long">
+      select count (*)
+      from order 
+    </select>
+  <select id="getList" resultType="com.hackhu.seckill.dto.OrderInfoDTO">
+    select
+    <include refid="Base_Column_List" />
+    from order_info
+    limit #{index,jdbcType=INTEGER},#{pageSize,jdbcType=INTEGER};
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     <!--
       WARNING - @mbggenerated
