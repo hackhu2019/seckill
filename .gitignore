@@ -163,3 +163,9 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 .idea/libraries/
 .idea/workspace.xml
+seckill.iml
+sql/temp/
+src/main/java/com/hackhu/seckill/dao/AdminDOMapper.java.1
+src/main/java/com/hackhu/seckill/dto/AdminDO.java.1
+src/main/java/com/hackhu/seckill/service/.idea/
+seckill.iml
